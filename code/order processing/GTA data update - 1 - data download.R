@@ -1,0 +1,11 @@
+GET("https://www.globaltradealert.org/backup/backup.php")
+
+GET("https://gta-backup.s3.eu-west-1.amazonaws.com/gta_measure.csv", write_disk("/home/rstudio/Dropbox/GTA cloud/data/database replica/gta_measure.csv", overwrite=TRUE))
+GET("https://gta-backup.s3.eu-west-1.amazonaws.com/gta_intervention.csv", write_disk("/home/rstudio/Dropbox/GTA cloud/data/database replica/gta_intervention.csv", overwrite=TRUE))
+GET("https://gta-backup.s3.eu-west-1.amazonaws.com/gta_implementing_jurisdiction.csv", write_disk("/home/rstudio/Dropbox/GTA cloud/data/database replica/gta_implementing_jurisdiction.csv", overwrite=TRUE))
+GET("https://gta-backup.s3.eu-west-1.amazonaws.com/gta_distorted_market.csv", write_disk("/home/rstudio/Dropbox/GTA cloud/data/database replica/gta_distorted_market.csv", overwrite=TRUE))
+GET("https://gta-backup.s3.eu-west-1.amazonaws.com/gta_affected_jurisdiction.csv", write_disk("/home/rstudio/Dropbox/GTA cloud/data/database replica/gta_affected_jurisdiction.csv", overwrite=TRUE))
+GET("https://gta-backup.s3.eu-west-1.amazonaws.com/gta_affected_tariff_line.csv", write_disk("/home/rstudio/Dropbox/GTA cloud/data/database replica/gta_affected_tariff_line.csv", overwrite=TRUE))
+GET("https://gta-backup.s3.eu-west-1.amazonaws.com/gta_affected_sector.csv", write_disk("/home/rstudio/Dropbox/GTA cloud/data/database replica/gta_affected_sector.csv", overwrite=TRUE))
+GET("https://gta-backup.s3.eu-west-1.amazonaws.com/gta_investigation_status_history.csv", write_disk("/home/rstudio/Dropbox/GTA cloud/data/database replica/gta_investigation_status_history.csv", overwrite=TRUE))
+GET("https://gta-backup.s3.eu-west-1.amazonaws.com/gta_it_revised.csv", write_disk("/home/rstudio/Dropbox/GTA cloud/data/database replica/gta_it_revised.csv", overwrite=TRUE))
