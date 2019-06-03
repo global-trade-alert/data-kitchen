@@ -1,0 +1,436 @@
+@charset "UTF-8";
+/* CSS Document */
+
+/*GTA DATA KITCHEN _____________________________________________________________*/
+
+* {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	font-family:'Open Sans', sans-serif;
+	background-color:#348bcb;
+}
+
+body p {
+	font-weight:400;
+	font-size: 0.9em;
+	color:rgba(50,50,50,1.00);
+}
+
+body h1 {
+	font-weight:700;
+	font-size:2.5em;
+	margin:0px 0px 5px 0px;
+}
+
+body h2 {
+	font-weight:300;
+	font-size:2.5em;
+	margin:0px;
+}
+
+.container-fluid {
+	padding:0px;
+}
+
+.overall-wrap {
+	width:100%;
+}
+
+@media(max-width:768px) {
+	body h1 {
+		font-size:1.8em;
+	}
+}
+
+.clear-both {
+	clear:both;
+}
+
+/*.shiny-notification {
+     position:fixed;
+     top: calc(50%);
+     left: calc(50%);
+ }*/
+
+
+
+/*APP Switcher_____________________________________________________________*/
+
+.app-switcher {
+	text-align: center;
+	z-index: 20;
+	width: 98%;
+	background-color: #19384e;
+	margin: 0 auto;
+	margin-bottom:-10px;
+	border-radius:10px;
+	overflow:hidden;
+}
+
+.app-switcher .tab-nav-wrapper {
+	display: inline-block;
+	overflow: auto;
+	width: 100%;
+	-ms-overflow-style: -ms-autohiding-scrollbar;
+	-webkit-overflow-scrolling: touch;
+	margin:10px 10px 20px 10px;
+}
+
+.app-switcher ul.tab-list {
+	list-style: none;
+	display: inline-block;
+	border-radius: 5px;
+	white-space: nowrap;
+}
+.app-switcher ul.tab-list li {
+	display: inline-block;
+	cursor: pointer;
+}
+
+.app-switcher ul.tab-list li.active {
+	border-radius: 5px;
+	background-color: #348bcb;
+	transition: all .2s ease-in-out;
+	box-shadow: 1px 1px 5px rgba(0,0,0,0.2);
+}
+
+.app-switcher ul.tab-list > li a {
+	display: inline-block;
+	border-radius: 5px;
+	font-size: 20px;
+	font-weight: 400;
+	color: #FFFFFF;
+	padding: 10px;
+	box-shadow: 1px 1px 5px rgba(0,0,0,0.2);
+	background-color: #264b66;
+
+
+}
+
+@media (max-width:991px) {
+	.app-switcher ul.tab-list > li a {
+	font-size: 15px;
+}
+}
+
+.app-switcher ul.tab-list li.active a {
+	color:#FFFFFF;
+}
+
+.app-switcher ul.tab-list > li a:hover {
+	background-color:#264b66;
+}
+
+.app-switcher ul.tab-list > li.active a {
+	background-color: unset;
+}
+
+.settings .tab-pane {
+	display:none;
+}
+
+.settings .tab-pane.active {
+	display:block;
+}
+
+
+
+/*SETTINGS_____________________________________________________________*/
+
+
+.settings {
+    width: 90%;
+    max-width:1200px;
+    margin:0 auto;
+    border-radius:5px;
+    background-color:#348bcb;
+}
+
+.settings-wrap {
+	margin: 0 auto;
+	height:100%;
+	background-color: #f1f2f2;
+	box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+	padding:40px;
+	min-height: 400px;
+	margin-bottom:40px;
+	border-radius:5px;
+}
+
+@media (max-width:767px) {
+	.settings-wrap {
+		padding:20px;
+	}
+}
+
+
+
+.param-wrap {
+	width:33.33%;
+	height:40px;
+	padding:10px;
+	float:left;
+	box-sizing: border-box;
+	position: relative;
+}
+
+.param {
+	width:90%;
+	height:100%;
+	float:left;
+	position: absolute;
+}
+
+.help {
+	float: right;
+	width:20px;
+	text-align: center;
+	cursor: pointer; 
+	right:10px;
+	position: absolute;
+	top: 15px
+}
+.help > p {
+	color:#FFFFFF;
+	font-weight: 700;
+	display: block;
+	height: 20px;
+	pointer-events: none;
+	background-color:#b6b6b6;;
+	width: 20px;
+	border-radius: 5px;
+	line-height:1;
+	margin:0;
+	padding-top:3px;
+}
+
+.tpd-content {
+	font-size:13px !important;
+	line-height:1.3 !important;
+}
+
+.tpd-content span {
+	display:block;
+	font-weight:700;
+	margin-top:10px;
+	margin-bottom:10px;
+}
+
+.tpd-content span:first-child {
+	margin-top:0px;
+}
+
+
+
+#generate_file,
+#generate_file_data_count {
+	background-color: #348bcb;
+	padding: 20px;
+	color: #FFFFFF;
+	font-weight: 700;
+	font-size: 1.2em;
+	border: unset;
+	transition: all 0.2s ease-out;
+	width:100%;
+	max-width:300px;
+}
+
+#generate_file:hover,
+#generate_file_data_count:hover {
+	transform: scale(1.01);
+	box-shadow:3px 3px 9px rgba(0,0,0,0.2);
+}
+
+#generate_file:active,
+#generate_file_data_count:active {
+	transform: scale(1);
+}
+
+.generate_file-inner {
+	display:table-cell;
+	vertical-align: middle;
+}
+
+.top_of_queue,
+.generate_file-wrap {
+	height:100%;
+	display:table;
+	text-align: center;
+	width: 100%;
+}
+
+.top_of_queue .shiny-input-container {
+	display:table-cell;
+	width: 100%;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.top_of_queue span {
+	font-size:1.2em;
+	font-weight:700;
+}
+
+@media (max-width:768px) {
+	#generate_file:hover {
+		position: relative;
+		widows: 100%;
+	}
+
+	.top_of_queue .shiny-input-container {
+		position: relative;
+	}
+}
+
+
+/* SETTINGS SHINY ADJUSTMENTS */
+
+.settings-general .control-label,
+.form-group > label {
+	font-size:1.2em;
+	margin-bottom:20px;
+}
+
+.settings-general .row:last-child {
+	margin-bottom:0px;
+}
+
+.shiny-input-container:not(.shiny-input-container-inline) {
+	width:100%;
+}
+
+
+@media (min-width:768px) {
+	.settings .row {
+		display:flex;
+		margin:0px;
+	}
+}
+
+.settings .row > div {
+	padding:16px;
+	margin:16px 8px 0px 8px;
+	background-color:#E7E7E7;
+}
+
+.settings .row > div:first-child {
+	padding:16px;
+	margin:16px 8px 0px 0px;
+	background-color:#E7E7E7;
+}
+
+.settings .row > div:last-child {
+	padding:16px;
+	margin:16px 0px 0px 8px;
+	background-color:#E7E7E7;
+}
+
+@media (max-width:767px) {
+	.settings-general .row {
+		margin:0px;
+	}
+
+	.settings .row > div,
+	.settings .row > div:last-child,
+	.settings .row > div:first-child {
+		padding:16px;
+		margin:16px 0px 0px 0px;
+	}
+}
+
+.settings-title h2 {
+	font-size:25px;
+	font-weight:700;
+	margin:30px 0px 10px 0px;
+	color:#19384e;
+}
+
+.title-top h2 {
+	margin:0px 0px 10px 0px;
+}
+
+@media (max-width:786px) {
+	.settings-title h2 {
+		font-size:20px;
+	}
+}
+
+
+
+/*HEADER_____________________________________________________________*/
+
+.header {
+	width: 90%;
+	max-width:1200px;
+	overflow: auto;
+	background-color: #348bcb;
+	margin:0 auto;
+
+}
+
+.header .title {
+	float:left;
+	margin:40px;
+	color:#FFFFFF;
+}
+
+.gta-logo img {
+	height: 70px;
+	float: right;
+	margin:40px;
+}
+
+@media(max-width:991px) {
+	.header .title {
+		margin:20px;
+	}
+
+	.header h1 {
+		font-size:1.5em;
+	}
+	.header h2 {
+		font-size:1.2em;
+	}
+	.gta-logo img {
+		margin:20px;
+		height:50px;
+	}
+}
+
+@media(max-width:768px) {
+	.header .title {
+		margin:20px;
+	}
+
+	.header h1 {
+		font-size:1.2em;
+	}
+	.header h2 {
+		font-size:1em;
+	}
+	.gta-logo img {
+		margin:20px;
+		height:40px;
+	}
+}
+
+
+@media(max-width:450px) {
+	.header .title {
+		margin:15px;
+	}
+
+	.header h1 {
+		font-size:0.8em;
+	}
+	.header h2 {
+		font-size:0.8em;
+	}
+	.gta-logo img {
+		margin:15px;
+		height:30px;
+	}
+}
