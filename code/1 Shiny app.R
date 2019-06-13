@@ -7,8 +7,8 @@ library(data.table)
 library(mailR)
 library(tidyverse)
 
-
 # gta_update_library()
+
 
 rm(list = ls())
 
@@ -16,6 +16,8 @@ rm(list = ls())
 # setwd("C:/Users/jfrit/Desktop/Dropbox/GTA cloud")
 # setwd("C:/Users/Piotr Lukaszuk/Dropbox/GTA cloud")
 setwd("/Users/patrickbuess/Dropbox/Collaborations/GTA cloud")
+path = "17 Shiny/4 data kitchen/"
+# path = "0 dev/data-kitchen-pb/"
 
 # Load required data
 countries <- gtalibrary::country.correspondence
@@ -125,12 +127,12 @@ ui <- function(request) { fluidPage(
   theme = "style.css",
   tags$head(tags$link(rel="stylesheet", type="text/css", href="tipped.css")),
   tags$head(tags$script(src="tipped.js")),
-
+  
   # HEADER
   HTML("<div class='overall-wrap'><div class='header'><div class='header-inner'><div class='title'><h1>GTA data kitchen</h1><h2>beta</h2></div><div class='gta-logo'><a href='http://globaltradealert.org' target='_blank'>"),
   img(src='GTA-LOGO-light-grey.svg'),
   HTML("</a></div></div></div>"),
-
+  
   # SETTINGS WRAP
   HTML("<div id='settings' class='settings'>
        <div class='app-switcher'>
@@ -143,12 +145,12 @@ ui <- function(request) { fluidPage(
        </div>
        <div class='settings-wrap'>
        <div class='settings-general'>"),
-
+  
   tags$div(id="app-status-infos",
            tags$div(class = "settings-title title-top", checked = NA,
                     tags$h2("App Status")
            ),
-
+           
            fluidRow(
              column(4,
                     tags$label(class = "control-label", checked = NA,
@@ -170,12 +172,12 @@ ui <- function(request) { fluidPage(
                     actionButton("update.gta",
                                  "Update underlying GTA data"))
            )),
-
+  
   ######## DATA COUNTS #########
-
+  
   HTML("<div class='tab-pane active fade in' id='data-counts'>"),
-
-
+  
+  
   tags$div(class = "settings-title", checked = NA,
            tags$h2("Use a query template")
   ),
@@ -195,12 +197,12 @@ ui <- function(request) { fluidPage(
                                    "Query 1" = "query_1"),
                        selected = "Unset"))
     ),
-
-
+  
+  
   tags$div(class = "settings-title", checked = NA,
            tags$h2("Data Counts Settings")
   ),
-
+  
   fluidRow(
     column(6,
            tags$div(class = "create-tooltip help",
@@ -246,8 +248,8 @@ ui <- function(request) { fluidPage(
                          "Keep selected implementers?",
                          value = T),
            checkboxInput("group.implementer.data.count",
-                          "Group selected implementers?",
-                          value = T)),
+                         "Group selected implementers?",
+                         value = T)),
     column(6,
            tags$div(class = "create-tooltip help",
                     title = "
@@ -257,6 +259,8 @@ ui <- function(request) { fluidPage(
                     Specify whether to focus on ('TRUE') or exclude ('FALSE') interventions with the stated affected country.
                     <span>Keep other countries</span>
                     Specify whether to keep the data for the other jurisdictions that happen to be affected alongside those you specified (T/F). Default is 'TRUE'.
+                    <span>Nr of affected countries included</span>
+                    Specify whether to include interventions that affect only one of the selected affected jurisdictions ('One'), at least one of the selected affected jurisdictions ('One plus') or all of the selected affected jurisdictions ('All'). Default is 'One plus'.                    
                     ",
                     tags$p("?")),
            multiInput("affected.data.count",
@@ -271,24 +275,29 @@ ui <- function(request) { fluidPage(
                          value = T),
            checkboxInput("group.affected.data.count",
                          "Group selected affected jurisdictions?",
-                         value = T))
+                         value = T),
+           selectInput("incl.affected.strictness.data.count",
+                       "Include interventions including ... of the selected countries",
+                       choices = c("One or more" = "ONEPLUS", "Only one" = "ONE", "All" = "ALL"),
+                       selected = "ONEPLUS"))
   ),
   fluidRow(
     column(6,
            tags$div(class = "create-tooltip help",
                     title = "
-                    <span>Additionally affected</span>
-                    Specify the maximum number of countries affected in addition to the specified affected countries. Default is any number. Provide value as integer.
-                    <span>Affected jointly</span>
-                    Specify whether included interventions shall affect all affected countries jointly ('TRUE') or jointly as well as individually ('FALSE'). Default is 'FALSE'.
+                    <span>Nr of affected countries</span>
+                    Specify the range for the number of importers affected by an intervention. Default is any number i.e. c(0,999).                    
+                    <span>Calculate nr of affected countries</span>
+                    Specify whether the number of importers affected by an intervention is calculated based only on the selected importers included ('Selected only'), only on the unselected importers ('Unselected only') or based on both ('All'). Default is 'All'.
                     ",
                     tags$p("?")),
-           numericInput("affected.also.nr.data.count",
-                        "Number of other countries affected",
-                        value = "", min = 0, max = length(unique(countries$name))),
-           checkboxInput("affected.jointly.data.count",
-                         "Must affect the selected countries jointly?",
-                         value = F)),
+           textInput("nr.affected.data.count",
+                     "Supply range for number of countries affected",
+                     placeholder = "0,999"),
+           selectInput("nr.affected.incl.data.count",
+                       "What affected countries should be included in this count?",
+                       choices = c("All" = "ALL","Selected only" = "SELECTED","Unselected only" = "UNSELECTED"),
+                       selected = "ALL")),
     column(6,
            tags$div(class = "create-tooltip help",
                     title = "
@@ -500,11 +509,11 @@ ui <- function(request) { fluidPage(
                      format = "mm-dd",
                      value = ""))
   ),
-
+  
   tags$div(class = "settings-title", checked = NA,
            tags$h2("Choose aggregation settings")
   ),
-
+  
   fluidRow(
     column(6,
            tags$div(class = "create-tooltip help",
@@ -684,11 +693,11 @@ ui <- function(request) { fluidPage(
                                         column.list.numeric,
                                         multiple = F)))
   ),
-
+  
   tags$div(class = "settings-title", checked = NA,
            tags$h2("Submit order")
   ),
-
+  
   fluidRow(
     column(4,
            textInput("order.email.data.count",
@@ -707,13 +716,13 @@ ui <- function(request) { fluidPage(
                              actionButton("generate_file_data_count",
                                           "Submit your order"))))
   ),
-
+  
   HTML("</div>"),
-
+  
   ######## TRADE COVERAGES #########
-
+  
   HTML("<div class='tab-pane fade' id='trade-coverages'>"),
-
+  
   tags$div(class = "settings-title", checked = NA,
            tags$h2("Use a query template")
   ),
@@ -732,13 +741,13 @@ ui <- function(request) { fluidPage(
                        choices = c("None" = "Unset",
                                    "Query 1" = "query_1")))
     ),
-
-
-
+  
+  
+  
   tags$div(class = "settings-title", checked = NA,
            tags$h2("Coverage Settings")
   ),
-
+  
   fluidRow(
     column(6,
            tags$div(class = "create-tooltip help",
@@ -826,6 +835,8 @@ ui <- function(request) { fluidPage(
                     Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated exporters.
                     <span>Separate Country Groups</span>
                     Specify whether to calculate values for country groups separately ('TRUE') or not ('FALSE').
+                    <span>Nr of exporters included</span>
+                    Specify whether to include interventions that affect only one of the selected exporters ('One'), at least one of the selected exporters ('One plus') or all of the selected exporters ('All'). Default is 'One plus'
                     ",
                     tags$p("?")),
            multiInput("exporters",
@@ -840,7 +851,11 @@ ui <- function(request) { fluidPage(
                          value = T),
            checkboxInput("separate.exporter.groups",
                          "Separately calculate country groups?",
-                         value = F)),
+                         value = F),
+           selectInput("incl.exporters.strictness",
+                       "Include interventions including ... of the selected countries",
+                       choices = c("One or more" = "ONEPLUS", "Only one" = "ONE", "All" = "ALL"),
+                       selected = "ONEPLUS")),
     column(4,
            tags$div(class = "create-tooltip help",
                     title = "
@@ -852,6 +867,8 @@ ui <- function(request) { fluidPage(
                     Specify whether to focus on ('TRUE') or exclude ('FALSE') the stated importers
                     <span>Separate Country Groups</span>
                     Specify whether to calculate values for country groups separately ('TRUE') or not ('FALSE').
+                    <span>Nr of importers included</span>
+                    Specify whether to include interventions that affect only one of the selected importers ('One'), at least one of the selected importers ('One plus') or all of the selected importers ('All'). Default is 'One plus'
                     ",
                     tags$p("?")),
            multiInput("importers",
@@ -866,7 +883,11 @@ ui <- function(request) { fluidPage(
                          value = T),
            checkboxInput("separate.importer.groups",
                          "Separately calculate country groups?",
-                         value = F)),
+                         value = F),
+           selectInput("incl.importers.strictness",
+                       "Include interventions including ... of the selected countries",
+                       choices = c("One or more" = "ONEPLUS", "Only one" = "ONE", "All" = "ALL"),
+                       selected = "ONEPLUS")),
     column(4,
            tags$div(class = "create-tooltip help",
                     title = "
@@ -893,33 +914,35 @@ ui <- function(request) { fluidPage(
     column(4,
            tags$div(class = "create-tooltip help",
                     title = "
-                    <span>Number of other importing countries</span>
-                    Specify the maximum number of importers affected in addition to the specified affected countries. Default is any number. Provide value as integer.
-                    <span>Jointly affected</span>
-                    Specify whether included interventions shall affect all specified importing countries jointly ('TRUE') or jointly as well as individually ('FALSE'). Default is 'FALSE'.
+                    <span>Number of importers</span>
+                    Specify the range for the number of importers affected by an intervention. Default is any number i.e. c(1,999)                    
+                    <span>Number of importers included</span>
+                    Specify whether in the number of importers affected by an intervention is calculated based only on the selected importers are included ('Selected only'), only on the unselected importers ('Unselected only') or based on both ('All'). Default is 'All'.
                     ",
                     tags$p("?")),
-           numericInput("nr.also.importers",
-                        "Number of other importing countries affected",
-                        value = "", min = 0, max = length(unique(countries$name))),
-           checkboxInput("jointly.affected.importers",
-                         "Must affect the selected countries jointly?",
-                         value = F)),
+           textInput("nr.importers",
+                     "Supply range for how many importers may be affected",
+                     placeholder = "0,999"),
+           selectInput("nr.importers.incl",
+                       "What affected importers should be included in this count?",
+                       choices = c("All" = "ALL","Selected only" = "SELECTED","Unselected only" = "UNSELECTED"),
+                       selected = "ALL")),
     column(4,
            tags$div(class = "create-tooltip help",
                     title = "
-                    <span>Number of other exporting countries</span>
-                    Specify the maximum number of exporters affected in addition to the specified affected countries. Default is any number. Provide value as integer.
-                    <span>Jointly affected</span>
-                    Specify whether included interventions shall affect all specified exporting countries jointly ('TRUE') or jointly as well as individually ('FALSE'). Default is 'FALSE'.
+                    <span>Number of exporters</span>
+                    Specify the range for the number of exporters affected by an intervention. Default is any number i.e. c(1,999)                    
+                    <span>Number of exporters included</span>
+                    Specify whether in the number of exporters affected by an intervention is calculated based only on the selected exporters are included ('Selected only'), only on the unselected exporters ('Unselected only') or based on both ('All'). Default is 'All'.
                     ",
                     tags$p("?")),
-           numericInput("nr.also.exporters",
-                        "Number of other exporting countries affected",
-                        value = "", min = 0, max = length(unique(countries$name))),
-           checkboxInput("jointly.affected.exporters",
-                         "Must affect the selected countries jointly?",
-                         value = F)),
+           textInput("nr.exporters",
+                     "Supply range for how many exporters may be affected",
+                     placeholder = "0,999"),
+           selectInput("nr.exporters.incl",
+                       "What affected exporters should be included in this count?",
+                       choices = c("All" = "ALL","Selected only" = "SELECTED","Unselected only" = "UNSELECTED"),
+                       selected = "ALL")),
     column(4,
            tags$div(class = "create-tooltip help",
                     title = "
@@ -1120,11 +1143,11 @@ ui <- function(request) { fluidPage(
                      format = "mm-dd",
                      value = ""))
   ),
-
+  
   tags$div(class = "settings-title", checked = NA,
            tags$h2("Submit order")
   ),
-
+  
   fluidRow(
     column(4,
            textInput("order.email",
@@ -1143,15 +1166,15 @@ ui <- function(request) { fluidPage(
                              actionButton("generate_file",
                                           "Submit your order"))))
   ),
-
+  
   # tableOutput("show_inputs")
-
+  
   HTML("</div>"),
-
-
-
+  
+  
+  
   # CLOSE SETTINGS
-
+  
   tags$script(src="tooltips.js"),
   tags$script(src="app.js"),
   HTML("</div></div></div></div>")
@@ -1161,39 +1184,39 @@ ui <- function(request) { fluidPage(
 
 # Function enabling rbinding if there are different number of columns present
 server <- function(input, output, session) {
-
+  
   observeEvent(input$predefined.data.count, {
-
+    
     callUpdateDataCounts(session = session,
                          query = input$predefined.data.count)
-
+    
   })
-
-
+  
+  
   observeEvent(input$predefined.coverages, {
-
+    
     callUpdateCoverages(session = session,
                         query = input$predefined.coverages)
-
+    
   })
-
-
-
+  
+  
+  
   rbind.all.columns <- function(x, y) {
     x.diff <- setdiff(colnames(x), colnames(y))
     y.diff <- setdiff(colnames(y), colnames(x))
-
+    
     x[, c(as.character(y.diff))] <- NA
     y[, c(as.character(x.diff))] <- NA
-
+    
     x <- as.data.frame(x)
     y <- as.data.frame(y)
-
+    
     return(rbind(x, y))
   }
-
+  
   ###### TRADE COVERAGE ######
-
+  
   AllInputs <- reactive({
     x <- reactiveValuesToList(input)
     test = data.frame(
@@ -1212,53 +1235,53 @@ server <- function(input, output, session) {
     test$update.gta <- NULL
     test
   })
-
+  
   # output$show_inputs <- renderTable({
   #   AllInputs()
   # })
-
+  
   output$queue <- renderText({
-    load("17 Shiny/4 data kitchen/log/kitchen log.Rdata")
+    load(paste0(path,"log/kitchen log.Rdata"))
     paste("Length of current queue:", sum(subset(kitchen.log, is.na(under.preparation)==F)$under.preparation))
   })
-
+  
   output$list_of_orders <- renderUI({
-    load("17 Shiny/4 data kitchen/log/kitchen log.Rdata")
+    load(paste0(path,"log/kitchen log.Rdata"))
     list.queue <- subset(kitchen.log, under.preparation == 1)$ticket.number
     selectInput("order_remove",
                 label=NULL,
                 choices = list.queue,
                 multiple=T)
   })
-
+  
   output$age <- renderText({
     paste("Underlying GTA data as of ", file.info("data/master_plus.Rdata")$mtime, "GMT")
   })
-
+  
   observeEvent(input$generate_file, {
     if(grepl("@", input$order.email)){
       showNotification("The requested trade coverage calculation was received.", type = "message", duration = NA)
-      load("17 Shiny/4 data kitchen/log/kitchen log.Rdata")
+      load(paste0(path,"log/kitchen log.Rdata"))
       test <- AllInputs()
       test <- as.data.frame(test)
       kitchen.log <- rbind.all.columns(kitchen.log, test)
       kitchen.log$ticket.number[nrow(kitchen.log)] <- nrow(kitchen.log)
       kitchen.log$order.type <- as.character(kitchen.log$order.type)
-      save(kitchen.log, file = "17 Shiny/4 data kitchen/log/kitchen log.Rdata")
-
-
+      save(kitchen.log, file = paste0(path,"log/kitchen log.Rdata"))
+      
+      
       test <- as.data.frame(t(subset(kitchen.log, ticket.number==nrow(kitchen.log))))
       test$text <- paste(row.names(test), test[,1], sep = ": ")
-
+      
       sender = "data@globaltradealert.org"
       recipients = as.character(kitchen.log$order.email[nrow(kitchen.log)])
       sbjct=paste("Thank you for your order [GTA data dish #",kitchen.log$ticket.number[nrow(kitchen.log)],"]",sep="")
       message=paste("Hello<p>Thank you for your order. The requested file is being calculated and you will receive a ",
                     "separate email as soon as it is finished.<br>In case of questions or suggestions, please reply to ",
                     "this message.<p>Regards<br>Global Trade Alert Data<br><br>Query overview:<br>", paste(test$text, collapse = "<br>"), sep = "")
-
-
-
+      
+      
+      
       send.mail(from = sender,
                 to = recipients,
                 subject=sbjct,
@@ -1271,49 +1294,49 @@ server <- function(input, output, session) {
                             passwd="B0d@nstrasse",
                             tls=T),
                 authenticate = T)
-
+      
       output$queue <- renderText({
-        load("17 Shiny/4 data kitchen/log/kitchen log.Rdata")
+        load(paste0(path,"log/kitchen log.Rdata"))
         paste("Length of current queue:", sum(subset(kitchen.log, is.na(under.preparation)==F)$under.preparation))
-
+        
         showNotification("The requested trade coverage calculation was received.", type = "message", duration = NA)
       })
-
+      
     }
   })
-
+  
   observeEvent(input$update.gta,{
-    load("17 Shiny/4 data kitchen/log/kitchen log.Rdata")
+    load(paste0(path,"log/kitchen log.Rdata"))
     kitchen.log[nrow(kitchen.log)+1,] <- NA
     kitchen.log$ticket.number[nrow(kitchen.log)] <- nrow(kitchen.log)
     kitchen.log$time.order[nrow(kitchen.log)] <- Sys.time()
     kitchen.log$order.type <- as.character(kitchen.log$order.type)
     kitchen.log$order.type[nrow(kitchen.log)] <- "GTA"
     kitchen.log$under.preparation[nrow(kitchen.log)] <- 1
-
-    save(kitchen.log, file = "17 Shiny/4 data kitchen/log/kitchen log.Rdata")
-
+    
+    save(kitchen.log, file = paste0(path,"log/kitchen log.Rdata"))
+    
     output$age <- renderText({
       paste("Current file was generated on:", file.info("data/master_plus.Rdata")$mtime)
     })
-
+    
     showNotification("GTA data will be updated.", type = "message", duration = NA)
-
+    
   })
-
+  
   observeEvent(input$remove.order,{
-    load("17 Shiny/4 data kitchen/log/kitchen log.Rdata")
+    load(paste0(path,"log/kitchen log.Rdata"))
     kitchen.log$under.preparation[kitchen.log$ticket.number %in% as.numeric(unlist(strsplit(input$order_remove,",")))] <- 0
-
-    save(kitchen.log, file = "17 Shiny/4 data kitchen/log/kitchen log.Rdata")
-
+    
+    save(kitchen.log, file = paste0(path,"log/kitchen log.Rdata"))
+    
     showNotification(paste("The following orders will be canceled: ", as.numeric(unlist(strsplit(input$order_remove,","))), collapse = ","), type = "message", duration = NA)
-
+    
   })
-
-
+  
+  
   ###### DATA COUNTS #######
-
+  
   AllInputs.data.count <- reactive({
     x <- reactiveValuesToList(input)
     test = data.frame(
@@ -1336,28 +1359,28 @@ server <- function(input, output, session) {
     test$update.gta.data.count <- NULL
     test
   })
-
+  
   observeEvent(input$generate_file_data_count, {
     if(grepl("@", input$order.email.data.count)){
-      load("17 Shiny/4 data kitchen/log/kitchen log.Rdata")
+      load(paste0(path,"log/kitchen log.Rdata"))
       test <- AllInputs.data.count()
       test <- as.data.frame(test)
       kitchen.log <- rbind.all.columns(kitchen.log, test)
       kitchen.log$ticket.number[nrow(kitchen.log)] <- nrow(kitchen.log)
       kitchen.log$order.type <- as.character(kitchen.log$order.type)
-      save(kitchen.log, file = "17 Shiny/4 data kitchen/log/kitchen log.Rdata")
-
-
+      save(kitchen.log, file = paste0(path,"log/kitchen log.Rdata"))
+      
+      
       test <- as.data.frame(t(subset(kitchen.log, ticket.number==nrow(kitchen.log))))
       test$text <- paste(row.names(test), test[,1], sep = ": ")
-
+      
       sender = "data@globaltradealert.org"
       recipients = as.character(kitchen.log$order.email[nrow(kitchen.log)])
       sbjct=paste("Thank you for your order [GTA data dish #",kitchen.log$ticket.number[nrow(kitchen.log)],"]",sep="")
       message=paste("Hello<p>Thank you for your order. The requested file is being calculated and you will receive a ",
                     "separate email as soon as it is finished.<br>In case of questions or suggestions, please reply to ",
                     "this message.<p>Regards<br>Global Trade Alert Data<br><br>Query overview:<br>", paste(test$text, collapse = "<br>"), sep = "")
-
+      
       send.mail(from = sender,
                 to = recipients,
                 subject=sbjct,
@@ -1370,19 +1393,19 @@ server <- function(input, output, session) {
                             passwd="B0d@nstrasse",
                             tls=T),
                 authenticate = T)
-
+      
       output$queue <- renderText({
-        load("17 Shiny/4 data kitchen/log/kitchen log.Rdata")
+        load(paste0(path,"log/kitchen log.Rdata"))
         paste("Length of current queue:", sum(subset(kitchen.log, is.na(under.preparation)==F)$under.preparation))
-
+        
         showNotification("The requested data count calculation was received.", type = "message", duration = NA)
       })
-
+      
     }
   })
-
-
-
+  
+  
+  
 }
 
 

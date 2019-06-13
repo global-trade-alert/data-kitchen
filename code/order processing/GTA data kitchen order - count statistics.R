@@ -2,8 +2,8 @@
 
 # library(gtalibrary)
 # setwd("/Users/patrickbuess/Dropbox/Collaborations/GTA cloud")
-# load("17 Shiny/4 data kitchen/log/kitchen log.Rdata")
-# kl = kitchen.log[585,]
+# load("0 dev/data-kitchen-pb/log/kitchen log.Rdata")
+# kl = kitchen.log[nrow(kitchen.log),]
 
 # PROCESSING
 
@@ -24,11 +24,18 @@ if(as.character(kl$implementers)!=""){
 if(as.character(kl$affected)!=""){
   aff=paste(unlist(strsplit(as.character(kl$affected),",")))
   aff <- aff[aff != ""]}else{aff=NULL}
+  
+if(as.character(kl$incl.affected.strictness)!=""){
+  incl.aff.str=paste(unlist(strsplit(as.character(kl$incl.affected.strictness),",")))}else{incl.aff.str=NULL}
 
-if(kl$affected.also.nr == "NA") {kl$affected.also.nr = ""}
-if(as.character(kl$affected.also.nr)!=""){
-  a.a.nr=paste(unlist(strsplit(as.character(kl$affected.also.nr),",")))}else{a.a.nr=NULL}
+if(as.character(kl$nr.affected)!=""){
+  nr.aff=as.numeric(paste(unlist(strsplit(as.character(kl$nr.affected),","))))
+  nr.aff <- nr.aff[is.na(nr.aff)==F]}else{nr.aff=NULL}
 
+if(as.character(kl$nr.affected.incl)!=""){
+  nr.aff.incl=paste(unlist(strsplit(as.character(kl$nr.affected.incl),",")))}else{nr.aff.incl=NULL}
+
+  
 if(as.character(kl$announcement.period)!="NA,NA"){
   a.period=paste(unlist(strsplit(as.character(kl$announcement.period),",")))
   a.period[a.period=="NA"] <- NA
@@ -119,9 +126,10 @@ gta_data_slicer(
   keep.implementer = kl$keep.implementer==T,
   affected.country = aff,
   keep.affected = kl$keep.affected==T,
+  incl.affected.strictness = incl.aff.str,
   keep.others = kl$keep.others==T,
-  affected.also.nr = a.a.nr,
-  affected.jointly = kl$affected.jointly==T,
+  nr.affected = nr.aff, 
+  nr.affected.incl = nr.aff.incl,
   announcement.period = a.period,
   implementation.period = i.period,
   keep.implementation.na = kl$keep.implementation.na == T,

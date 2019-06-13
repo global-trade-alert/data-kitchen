@@ -34,8 +34,9 @@ updateDataCounts <- function(session,
                              keep.affected.data.count = TRUE,
                              group.affected.data.count = TRUE,
                              keep.others.data.count = TRUE,
-                             affected.also.nr.data.count = NULL,
-                             affected.jointly.data.count = FALSE,
+                             incl.affected.strictness.data.count = "ONEPLUS",
+                             nr.affected.data.count = "1,999",
+                             nr.affected.incl.data.count = "ALL",
                              in.force.today.data.count = "Any",
                              announcement.period.data.count = c(NA,NA),
                              implementation.period.data.count = c(NA,NA),
@@ -107,7 +108,19 @@ updateDataCounts <- function(session,
                         "keep.others.data.count",
                         value = keep.others.data.count)
 
+    updateSelectInput(session,
+                      "incl.affected.strictness.data.count",
+                      value = incl.affected.strictness.data.count)
+    
+    updateTextInput(session,
+                    "nr.affected.data.count",
+                    value = nr.affected.data.count)
+    
+    updateSelectInput(session,
+                      "nr.affected.incl.data.count",
+                      value = nr.affected.incl.data.count)
 
+    
     updateNumericInput(session,
                        "affected.also.nr.data.count",
                        value = affected.also.nr.data.count)
