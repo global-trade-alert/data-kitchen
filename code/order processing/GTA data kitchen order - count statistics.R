@@ -1,9 +1,9 @@
-# UNCOMMENT FOR TESTING
-
-# library(gtalibrary)
+# # UNCOMMENT FOR TESTING
+# 
+# # library(gtalibrary)
 # setwd("/Users/patrickbuess/Dropbox/Collaborations/GTA cloud")
 # load("0 dev/data-kitchen-pb/log/kitchen log.Rdata")
-# kl = kitchen.log[nrow(kitchen.log),]
+# kl = kitchen.log[667,]
 
 # PROCESSING
 
@@ -30,7 +30,7 @@ if(as.character(kl$incl.affected.strictness)!=""){
 
 if(as.character(kl$nr.affected)!=""){
   nr.aff=as.numeric(paste(unlist(strsplit(as.character(kl$nr.affected),","))))
-  nr.aff <- nr.aff[is.na(nr.aff)==F]}else{nr.aff=NULL}
+  nr.aff <- nr.aff[is.na(nr.aff)==F]}else{nr.aff=c(0,999)}
 
 if(as.character(kl$nr.affected.incl)!=""){
   nr.aff.incl=paste(unlist(strsplit(as.character(kl$nr.affected.incl),",")))}else{nr.aff.incl=NULL}
@@ -153,7 +153,6 @@ gta_data_slicer(
   keep.interventions = kl$keep.interventions==T,
   lag.adjustment=lag
 )
-
 
 
 if (error.message[1] == T) {

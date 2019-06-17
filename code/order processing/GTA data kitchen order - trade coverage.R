@@ -1,5 +1,7 @@
 # UNCOMMENT FOR TESTING
 
+library(xlsx)
+
 # setwd("/Users/patrickbuess/Dropbox/Collaborations/GTA cloud")
 # load("0 dev/data-kitchen-pb/log/kitchen log.Rdata")
 # kl = kitchen.log[nrow(kitchen.log),]
@@ -26,7 +28,7 @@ if(as.character(kl$incl.importers.strictness)!=""){
   
 if(as.character(kl$nr.importers)!=""){
   nr.imp=as.numeric(paste(unlist(strsplit(as.character(kl$nr.importers),","))))
-  nr.imp <- nr.imp[is.na(nr.imp)==F]}else{nr.imp=NULL}
+  nr.imp <- nr.imp[is.na(nr.imp)==F]}else{nr.imp=c(0,999)}
 
 if(as.character(kl$nr.importers.incl)!=""){
   nr.imp.incl=paste(unlist(strsplit(as.character(kl$nr.importers.incl),",")))}else{nr.imp.incl=NULL}
@@ -40,7 +42,7 @@ if(as.character(kl$incl.exporters.strictness)!=""){
 
 if(as.character(kl$nr.exporters)!=""){
   nr.exp=as.numeric(paste(unlist(strsplit(as.character(kl$nr.exporters),","))))
-  nr.exp <- nr.exp[is.na(nr.exp)==F]}else{nr.exp=NULL}
+  nr.exp <- nr.exp[is.na(nr.exp)==F]}else{nr.exp=c(0,999)}
 
 if(as.character(kl$nr.exporters.incl)!=""){
   nr.exp.incl=paste(unlist(strsplit(as.character(kl$nr.exporters.incl),",")))}else{nr.exp.incl=NULL}
@@ -173,6 +175,7 @@ gta_trade_coverage(
   xlsx = TRUE,
   output.path = paste("17 Shiny/4 data kitchen/results/",Sys.Date()," - GTA data dish #",kl$ticket.number,".xlsx",sep="")
 )
+
 
 rm(c.period,gta.eval,a.flow,imps,nr.imp,nr.imp.incl,incl.imp.str,exps,nr.exp,nr.exp.incl,incl.exp.str,ij,ij.role,a.period,i.period,r.period,ift,i.types,mast,il,ef,cpc,hs,int.id,lag)
 rm(kl, trade.coverage.estimates, bilateral.trade,parameter.choices)
