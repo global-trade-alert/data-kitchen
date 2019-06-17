@@ -32,8 +32,6 @@ updateCoverages <- function(session,
                             affected = "",
                             keep.affected = TRUE,
                             keep.others = TRUE,
-                            affected.also.nr = NULL,
-                            affected.jointly = FALSE,
                             in.force.today = "Any",
                             announcement.period = c(NA,NA),
                             implementation.period = c(NA,NA),
@@ -64,10 +62,16 @@ updateCoverages <- function(session,
                             exporters = "",
                             group.exporters = TRUE,
                             keep.exporters = TRUE,
+                            incl.exporters.strictness = "ONEPLUS",
+                            nr.exporter = "",
+                            nr.exporter.incl = "ALL",
                             separate.exporter.groups = FALSE,
                             importers = "",
                             group.importers = TRUE,
                             keep.importers = TRUE,
+                            incl.importers.strictness = "ONEPLUS",
+                            nr.importer = "",
+                            nr.importer.incl = "ALL",
                             separate.importer.groups = FALSE,
                             implementer.role = c("Importer", "3rd country"),
                             nr.also.importers = "",
@@ -108,18 +112,6 @@ updateCoverages <- function(session,
     updateCheckboxInput(session,
                         "keep.others",
                         value = keep.others)
-
-    updateNumericInput(session,
-                       "affected.also.nr",
-                       value = affected.also.nr)
-
-    updateCheckboxInput(session,
-                        "affected.jointly",
-                        value = affected.jointly)
-
-    updateCheckboxInput(session,
-                        "in.force.today",
-                        value = in.force.today)
 
     updateCheckboxInput(session,
                         "in.force.today",
@@ -248,6 +240,19 @@ updateCoverages <- function(session,
                         "keep.exporters",
                         value = keep.exporters)
 
+    
+    updateSelectInput(session,
+                      "incl.exporters.strictness",
+                      value = incl.exporters.strictness)
+    
+    updateTextInput(session,
+                    "nr.exporters",
+                    value = nr.exporters)
+    
+    updateSelectInput(session,
+                      "nr.exporters.incl",
+                      value = nr.exporters.incl)
+    
 
     updateCheckboxInput(session,
                         "separate.exporter.groups",
@@ -266,6 +271,18 @@ updateCoverages <- function(session,
     updateCheckboxInput(session,
                         "keep.importers",
                         value = keep.importers)
+    
+    updateSelectInput(session,
+                      "incl.importers.strictness",
+                      value = incl.importers.strictness)
+    
+    updateTimtInput(session,
+                    "nr.importers",
+                    value = nr.importers)
+    
+    updateSelectInput(session,
+                      "nr.importers.incl",
+                      value = nr.importers.incl)
 
 
     updateCheckboxInput(session,

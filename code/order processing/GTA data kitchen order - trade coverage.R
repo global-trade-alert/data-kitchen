@@ -1,10 +1,10 @@
 # UNCOMMENT FOR TESTING
 
-# library(gtalibrary)
-# library(xlsx)
+library(xlsx)
+
 # setwd("/Users/patrickbuess/Dropbox/Collaborations/GTA cloud")
-# load("17 Shiny/4 data kitchen/log/kitchen log.Rdata")
-# kl = kitchen.log[550,]
+# load("0 dev/data-kitchen-pb/log/kitchen log.Rdata")
+# kl = kitchen.log[nrow(kitchen.log),]
 
 # PROCESSING
 
@@ -23,16 +23,30 @@ if(as.character(kl$importers)!=""){
   imps=paste(unlist(strsplit(as.character(kl$importers),",")))
   if("" %in% imps){imps = imps[!imps==""]}}else{imps=NULL}
 
-if(as.character(kl$nr.also.importers)!="NA"){
-  nr.a.i=paste(unlist(strsplit(as.character(kl$nr.also.importers),",")))}else{nr.a.i=NULL}
+if(as.character(kl$incl.importers.strictness)!=""){
+  incl.imp.str=paste(unlist(strsplit(as.character(kl$incl.importers.strictness),",")))}else{incl.imp.str=NULL}
+  
+if(as.character(kl$nr.importers)!=""){
+  nr.imp=as.numeric(paste(unlist(strsplit(as.character(kl$nr.importers),","))))
+  nr.imp <- nr.imp[is.na(nr.imp)==F]}else{nr.imp=c(0,999)}
 
+if(as.character(kl$nr.importers.incl)!=""){
+  nr.imp.incl=paste(unlist(strsplit(as.character(kl$nr.importers.incl),",")))}else{nr.imp.incl=NULL}
+  
 if(as.character(kl$exporters)!=""){
   exps=paste(unlist(strsplit(as.character(kl$exporters),",")))
   if("" %in% exps){exps = exps[!exps==""]}}else{exps=NULL}
 
-if(as.character(kl$nr.also.exporters)!="NA"){
-  nr.a.e=paste(unlist(strsplit(as.character(kl$nr.also.exporters),",")))}else{nr.a.e=NULL}
+if(as.character(kl$incl.exporters.strictness)!=""){
+  incl.exp.str=paste(unlist(strsplit(as.character(kl$incl.exporters.strictness),",")))}else{incl.exp.str=NULL}
 
+if(as.character(kl$nr.exporters)!=""){
+  nr.exp=as.numeric(paste(unlist(strsplit(as.character(kl$nr.exporters),","))))
+  nr.exp <- nr.exp[is.na(nr.exp)==F]}else{nr.exp=c(0,999)}
+
+if(as.character(kl$nr.exporters.incl)!=""){
+  nr.exp.incl=paste(unlist(strsplit(as.character(kl$nr.exporters.incl),",")))}else{nr.exp.incl=NULL}
+  
 if(as.character(kl$implementers)!=""){
   ij=paste(unlist(strsplit(as.character(kl$implementers),",")))
   ij <- ij[ij != ""]}else{ij=NULL}
@@ -118,15 +132,17 @@ gta_trade_coverage(
   importers = imps,
   group.importers = kl$group.importers==T,
   keep.importers = kl$keep.importers==T,
+  incl.importers.strictness = incl.imp.str,
   separate.importer.groups = kl$separate.importer.groups==T,
-  nr.also.importers = nr.a.i,
-  jointly.affected.importers = kl$jointly.affected.importers == T,
+  nr.importers = nr.imp, 
+  nr.importers.incl = nr.imp.incl,
   exporters = exps,
   group.exporters = kl$group.exporters==T,
   keep.exporters = kl$keep.exporters==T,
+  incl.exporters.strictness = incl.exp.str,
   separate.exporter.groups = kl$separate.exporter.groups==T,
-  nr.also.exporters = nr.a.e,
-  jointly.affected.exporters = kl$jointly.affected.exporters == T,
+  nr.exporters = nr.exp, 
+  nr.exporters.incl = nr.exp.incl,
   implementers = ij,
   implementer.role = ij.role,
   keep.implementer = kl$keep.implementer==T,
@@ -160,7 +176,8 @@ gta_trade_coverage(
   output.path = paste("17 Shiny/4 data kitchen/results/",Sys.Date()," - GTA data dish #",kl$ticket.number,".xlsx",sep="")
 )
 
-rm(c.period,gta.eval,a.flow,imps,exps,ij,ij.role,a.period,i.period,r.period,ift,i.types,mast,il,ef,cpc,hs,int.id,lag)
+
+rm(c.period,gta.eval,a.flow,imps,nr.imp,nr.imp.incl,incl.imp.str,exps,nr.exp,nr.exp.incl,incl.exp.str,ij,ij.role,a.period,i.period,r.period,ift,i.types,mast,il,ef,cpc,hs,int.id,lag)
 rm(kl, trade.coverage.estimates, bilateral.trade,parameter.choices)
 
 if (error.message[1] == T) {
