@@ -48,12 +48,13 @@ products <- gtalibrary::hs.names
 products$hs.name=as.character(products$hs.name)
 products$merged <- substr(paste(sprintf("%06i",as.numeric(products$HS12code)), products$hs.name, sep = " - "),1,40)
 products$merged=gsub("'","",products$merged)
-product.groups <- gtalibrary::hs.codes
-product.groups <- names(product.groups)
-product.groups <- product.groups[grepl("is.", product.groups)]
-product.groups <- gsub("is.","",product.groups)
-product.groups <- gsub("\\."," ",product.groups)
-product.groups <- tools::toTitleCase(product.groups)
+# product.groups <- gtalibrary::hs.codes
+# product.groups <- names(product.groups)
+# product.groups <- product.groups[grepl("is.", product.groups)]
+# product.groups <- gsub("is.","",product.groups)
+# product.groups <- gsub("\\."," ",product.groups)
+# product.groups <- tools::toTitleCase(product.groups)
+product.groups<- c('Raw materials','Intermediate goods','Consumer goods','Capital goods','Agricultural goods')
 
 eval(parse(text=paste("products_list=c(",paste(paste("'",product.groups,"'", sep=""), collapse = ","),",",paste(paste("'", products$merged,"'='",products$HS12code,"'",sep=""), collapse=","),")")))
 
@@ -957,7 +958,7 @@ ui <- function(request) { fluidPage(
     column(4,
            tags$div(class = "create-tooltip help",
                     title = "
-                    <span>Hit brackets</span>
+                    <span>Number of interventions</span>
                     Specify whether to calculate the trade shares by the number of interventions affecting a importer-exporter-product combination e.g. '1,2,3,4,5,999999' for the brackets '1-2,3-4,5 or more'. Default is '1,99999'.
                     ",
                     tags$p("?")),
