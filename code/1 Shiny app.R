@@ -16,8 +16,8 @@ rm(list = ls())
 # setwd("C:/Users/jfrit/Desktop/Dropbox/GTA cloud")
 # setwd("C:/Users/Piotr Lukaszuk/Dropbox/GTA cloud")
 setwd("/Users/patrickbuess/Dropbox/Collaborations/GTA cloud")
-path = "17 Shiny/4 data kitchen/"
-# path = "0 dev/data-kitchen-pb/"
+# path = "17 Shiny/4 data kitchen/"
+path = "0 dev/data-kitchen-pb/"
 
 # Load required data
 countries <- gtalibrary::country.correspondence
@@ -48,8 +48,14 @@ products <- gtalibrary::hs.names
 products$hs.name=as.character(products$hs.name)
 products$merged <- substr(paste(sprintf("%06i",as.numeric(products$HS12code)), products$hs.name, sep = " - "),1,40)
 products$merged=gsub("'","",products$merged)
+product.groups <- gtalibrary::hs.codes
+product.groups <- names(product.groups)
+product.groups <- product.groups[grepl("is.", product.groups)]
+product.groups <- gsub("is.","",product.groups)
+product.groups <- gsub("\\."," ",product.groups)
+product.groups <- tools::toTitleCase(product.groups)
 
-eval(parse(text=paste("products_list=c(",paste(paste("'", products$merged,"'='",products$HS12code,"'",sep=""), collapse=","),")")))
+eval(parse(text=paste("products_list=c(",paste(paste("'",product.groups,"'", sep=""), collapse = ","),",",paste(paste("'", products$merged,"'='",products$HS12code,"'",sep=""), collapse=","),")")))
 
 colour.list <- c("Red" = "gta_colour$red[1]",
                  "Red light" = "gta_colour$red[4]",
@@ -115,8 +121,8 @@ mast_chapters = c( "A: Sanitary and phytosanitary measure" = "A",
                    "Instrument unclear" = "X"
 )
 
-source("17 Shiny/4 data kitchen/code/modules/updateCoverages.R")
-source("17 Shiny/4 data kitchen/code/modules/updateDataCounts.R", local = T)
+source(paste0(path,"/code/modules/updateCoverages.R"))
+source(paste0(path,"/code/modules/updateDataCounts.R"), local = T)
 
 load("data/master_plus.Rdata")
 master.cols <- colnames(master)
@@ -242,8 +248,8 @@ ui <- function(request) { fluidPage(
                     tags$p("?")),
            multiInput("implementers.data.count",
                       "Restrict implementers",
-                      choices = c("All" = "", c(as.character(unique(countries$name)))),
-                      selected = ""),
+                      choices = c("All countries" = "all", c(as.character(unique(countries$name)))),
+                      selected = "all"),
            checkboxInput("keep.implementer.data.count",
                          "Keep selected implementers?",
                          value = T),
@@ -265,14 +271,14 @@ ui <- function(request) { fluidPage(
                     tags$p("?")),
            multiInput("affected.data.count",
                       "Restrict affected countries",
-                      choices = c("All" = "", c(as.character(unique(countries$name)))),
-                      selected = ""),
+                      choices = c("All countries" = "all", c(as.character(unique(countries$name)))),
+                      selected = "all"),
            checkboxInput("keep.affected.data.count",
                          "Keep selected affected jurisdictions?",
                          value = T),
            checkboxInput("keep.others.data.count",
                          "Keep other affected jurisdictions?",
-                         value = T),
+                         value = F),
            checkboxInput("group.affected.data.count",
                          "Group selected affected jurisdictions?",
                          value = T),
@@ -282,6 +288,17 @@ ui <- function(request) { fluidPage(
                        selected = "ONEPLUS"))
   ),
   fluidRow(
+    column(6,
+           tags$div(class = "create-tooltip help",
+                    title = "
+                    <span>In force today</span>
+                    Specify whether you want to focus on interventions in force today ('TRUE') or no longer in force today ('FALSE'). Default is 'any'.
+                    ",
+                    tags$p("?")),
+           selectInput("in.force.today.data.count",
+                       "Interventions in force today?",
+                       c("Yes", "No", "Any"),
+                       selected = "Any")),
     column(6,
            tags$div(class = "create-tooltip help",
                     title = "
@@ -297,18 +314,7 @@ ui <- function(request) { fluidPage(
            selectInput("nr.affected.incl.data.count",
                        "What affected countries should be included in this count?",
                        choices = c("All" = "ALL","Selected only" = "SELECTED","Unselected only" = "UNSELECTED"),
-                       selected = "ALL")),
-    column(6,
-           tags$div(class = "create-tooltip help",
-                    title = "
-                    <span>In force today</span>
-                    Specify whether you want to focus on interventions in force today ('TRUE') or no longer in force today ('FALSE'). Default is 'any'.
-                    ",
-                    tags$p("?")),
-           selectInput("in.force.today.data.count",
-                       "Interventions in force today?",
-                       c("Yes", "No", "Any"),
-                       selected = "Any"))
+                       selected = "ALL"))
   ),
   fluidRow(
     column(3,
@@ -379,8 +385,8 @@ ui <- function(request) { fluidPage(
                     tags$p("?")),
            multiInput("intervention.types.data.count",
                       "Restrict intervention types",
-                      c("All" = "", as.character(unique(intervention_types$intervention.type))),
-                      selected = "",
+                      c("All types" = "all", as.character(unique(intervention_types$intervention.type))),
+                      selected = "all",
                       width = "100%"),
            checkboxInput("keep.type.data.count",
                          "Keep the selected intervention types?",
@@ -399,8 +405,8 @@ ui <- function(request) { fluidPage(
                     tags$p("?")),
            multiInput("mast.chapters.data.count",
                       "Restrict MAST chapters",
-                      c("All" = "", mast_chapters),
-                      selected = "",
+                      c("All chapters" = "all", mast_chapters),
+                      selected = "all",
                       width = "100%"),
            checkboxInput("keep.mast.data.count",
                          "Keep the selected MAST chapters?",
@@ -455,8 +461,8 @@ ui <- function(request) { fluidPage(
                     tags$p("?")),
            multiInput("cpc.sectors.data.count",
                       "Restrict CPC sectors",
-                      c("All" = "", "All service sectors" = "all_service", "All goods sectors" = "all_goods", sectors_list),
-                      selected = "",
+                      c("All sectors" = "all", "All service sectors" = "all_service", "All goods sectors" = "all_goods", product.groups, sectors_list),
+                      selected = "all",
                       width = "100%"),
            checkboxInput("keep.cpc.data.count",
                          "Keep the selected CPC sectors?",
@@ -475,8 +481,8 @@ ui <- function(request) { fluidPage(
                     tags$p("?")),
            multiInput("hs.codes.data.count",
                       "Restrict HS codes",
-                      c("All" = "", products_list),
-                      selected = "",
+                      c("All HS codes" = "all", products_list),
+                      selected = "all",
                       width = "100%"),
            checkboxInput("keep.hs.data.count",
                          "Keep the selected HS codes?",
@@ -655,7 +661,14 @@ ui <- function(request) { fluidPage(
                             selectInput("map.value.data.count",
                                         "Select value data column",
                                         column.list.numeric,
-                                        multiple = F)))
+                                        multiple = F),
+                            numericInput("map.splits.data.count",
+                                        "Choose number of coloring shades",
+                                        value = 3),
+                            textInput("map.brackets.data.count",
+                                      "Define bracket boundaries (will override number of coloring shades)",
+                                       placeholder = "e.g. '1,20,40'")
+                            ))
   ),
   conditionalPanel(condition = "input['tile.data.count'] == true",
                    tags$div(class = "settings-title", checked = NA,
@@ -769,10 +782,8 @@ ui <- function(request) { fluidPage(
     ),
     column(6,
            selectInput("choose.tradebase",
-                       "Choose a different trade data",
-                       choices = c("GTA base years"= "base",
-                                   "Year prior to coverage-year" = "prior year",
-                                   "Year of coverage-year" = "current year",
+                       "Trade weights based on data from",
+                       choices = c("GTA base years" = "base",
                                    "2007" = "2007",
                                    "2008" = "2008",
                                    "2009" = "2009",
@@ -785,7 +796,7 @@ ui <- function(request) { fluidPage(
                                    "2016" = "2016",
                                    "2017" = "2017"),
                        multiple = F,
-                       selected = "base.years"),
+                       selected = "base"),
            selectInput("choose.output",
                        "Choose trade statistic",
                        choices=c("Shares" = "share",
@@ -841,8 +852,8 @@ ui <- function(request) { fluidPage(
                     tags$p("?")),
            multiInput("exporters",
                       "Restrict exporters",
-                      choices = c("All" = "", c(as.character(unique(countries$name)))),
-                      selected = ""),
+                      choices = c("All countries" = "all", c(as.character(unique(countries$name)))),
+                      selected = "all"),
            checkboxInput("group.exporters",
                          "Group selected exporters together?",
                          value = T),
@@ -873,8 +884,8 @@ ui <- function(request) { fluidPage(
                     tags$p("?")),
            multiInput("importers",
                       "Restrict importers",
-                      choices = c("All" = "", c(as.character(unique(countries$name)))),
-                      selected = ""),
+                      choices = c("All countries" = "all", c(as.character(unique(countries$name)))),
+                      selected = "all"),
            checkboxInput("group.importers",
                          "Group selected importers together?",
                          value = T),
@@ -899,8 +910,8 @@ ui <- function(request) { fluidPage(
                     tags$p("?")),
            multiInput("implementers",
                       "Restrict implementers",
-                      choices = c("All" = "", c(as.character(unique(countries$name)))),
-                      selected = ""),
+                      choices = c("All countries" = "all", c(as.character(unique(countries$name)))),
+                      selected = "all"),
            checkboxInput("keep.implementer",
                          "Keep selected implementers?",
                          value = T),
@@ -911,22 +922,6 @@ ui <- function(request) { fluidPage(
     )
     ),
   fluidRow(
-    column(4,
-           tags$div(class = "create-tooltip help",
-                    title = "
-                    <span>Number of importers</span>
-                    Specify the range for the number of importers affected by an intervention. Default is any number i.e. c(1,999)                    
-                    <span>Number of importers included</span>
-                    Specify whether in the number of importers affected by an intervention is calculated based only on the selected importers are included ('Selected only'), only on the unselected importers ('Unselected only') or based on both ('All'). Default is 'All'.
-                    ",
-                    tags$p("?")),
-           textInput("nr.importers",
-                     "Supply range for how many importers may be affected",
-                     placeholder = "0,999"),
-           selectInput("nr.importers.incl",
-                       "What affected importers should be included in this count?",
-                       choices = c("All" = "ALL","Selected only" = "SELECTED","Unselected only" = "UNSELECTED"),
-                       selected = "ALL")),
     column(4,
            tags$div(class = "create-tooltip help",
                     title = "
@@ -946,12 +941,28 @@ ui <- function(request) { fluidPage(
     column(4,
            tags$div(class = "create-tooltip help",
                     title = "
+                    <span>Number of importers</span>
+                    Specify the range for the number of importers affected by an intervention. Default is any number i.e. c(1,999)                    
+                    <span>Number of importers included</span>
+                    Specify whether in the number of importers affected by an intervention is calculated based only on the selected importers are included ('Selected only'), only on the unselected importers ('Unselected only') or based on both ('All'). Default is 'All'.
+                    ",
+                    tags$p("?")),
+           textInput("nr.importers",
+                     "Supply range for how many importers may be affected",
+                     placeholder = "0,999"),
+           selectInput("nr.importers.incl",
+                       "What affected importers should be included in this count?",
+                       choices = c("All" = "ALL","Selected only" = "SELECTED","Unselected only" = "UNSELECTED"),
+                       selected = "ALL")),
+    column(4,
+           tags$div(class = "create-tooltip help",
+                    title = "
                     <span>Hit brackets</span>
                     Specify whether to calculate the trade shares by the number of interventions affecting a importer-exporter-product combination e.g. '1,2,3,4,5,999999' for the brackets '1-2,3-4,5 or more'. Default is '1,99999'.
                     ",
                     tags$p("?")),
            textInput("hit.brackets",
-                     "Add Hit Brackets as comma-separated list:",
+                     "Breakdown by number of interventions",
                      placeholder = "1,99999"))
   ),
   fluidRow(
@@ -987,6 +998,20 @@ ui <- function(request) { fluidPage(
            dateRangeInput("revocation.period",
                           "Revocation period",
                           start = "0000-00-00",
+                          end = "0000-00-00"),
+           checkboxInput("keep.revocation.na",
+                         "Keep interventions without revocation date?",
+                         value = T)),
+    column(3,
+           tags$div(class = "create-tooltip help",
+                    title = "
+                    <span>Submission Period</span>
+                    Specify a period in which the interventions for your analysis have been submitted Default is 'any' (incl. not revoked). Provide vectors c(after.date, before.date) in R's date format. Also, specify c(after.date, NA) to focus on interventions submitted since 'after.date'.
+                    ",
+                    tags$p("?")),
+           dateRangeInput("submission.period",
+                          "Submission period",
+                          start = "0000-00-00",
                           end = "0000-00-00")),
     column(3,
            tags$div(class = "create-tooltip help",
@@ -1014,8 +1039,8 @@ ui <- function(request) { fluidPage(
                     tags$p("?")),
            multiInput("intervention.types",
                       "Restrict the intervention types",
-                      c("All" = "", as.character(unique(intervention_types$intervention.type))),
-                      selected = "",
+                      c("All types" = "all", as.character(unique(intervention_types$intervention.type))),
+                      selected = "all",
                       width = "100%"),
            checkboxInput("keep.type",
                          "Keep the selected intervention types?",
@@ -1036,8 +1061,8 @@ ui <- function(request) { fluidPage(
                     tags$p("?")),
            multiInput("mast.chapters",
                       "Restrict the MAST chapters",
-                      c("All" = "", mast_chapters),
-                      selected = "",
+                      c("All chapters" = "all", mast_chapters),
+                      selected = "all",
                       width = "100%"),
            checkboxInput("keep.mast",
                          "Keep the selected MAST chapters?",
@@ -1092,8 +1117,8 @@ ui <- function(request) { fluidPage(
                     tags$p("?")),
            multiInput("cpc.sectors",
                       "Restrict the CPC sectors",
-                      c("All" = "", sectors_list),
-                      selected = "",
+                      c("All sectors" = "all", "All service sectors" = "all_service", "All goods sectors" = "all_goods", product.groups, sectors_list),
+                      selected = "all",
                       width = "100%"),
            checkboxInput("keep.cpc",
                          "Keep the selected CPC sectors?",
@@ -1109,8 +1134,8 @@ ui <- function(request) { fluidPage(
                     tags$p("?")),
            multiInput("hs.codes",
                       "Restrict the HS codes",
-                      c("All" = "", products_list),
-                      selected = "",
+                      c("All HS codes" = "all", products_list),
+                      selected = "all",
                       width = "100%"),
            checkboxInput("keep.hs",
                          "Keep the selected HS codes?",
@@ -1159,6 +1184,9 @@ ui <- function(request) { fluidPage(
            checkboxInput("top.of.queue",
                          "Push to the front of the queue?",
                          value = F),
+           checkboxInput("xlsx.interventions",
+                         "Generate a list with included interventions?",
+                         value = T),
            HTML("</div>")),
     column(4,
            tags$div(class="generate_file-wrap", checked = NA,
