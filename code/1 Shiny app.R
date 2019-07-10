@@ -12,12 +12,12 @@ library(tidyverse)
 
 rm(list = ls())
 
-# setwd("/home/rstudio/Dropbox/GTA cloud")
+setwd("/home/rstudio/Dropbox/GTA cloud")
 # setwd("C:/Users/jfrit/Desktop/Dropbox/GTA cloud")
 # setwd("C:/Users/Piotr Lukaszuk/Dropbox/GTA cloud")
-setwd("/Users/patrickbuess/Dropbox/Collaborations/GTA cloud")
-# path = "17 Shiny/4 data kitchen/"
-path = "0 dev/data-kitchen-pb/"
+# setwd("/Users/patrickbuess/Dropbox/Collaborations/GTA cloud")
+path = "17 Shiny/4 data kitchen/"
+# path = "0 dev/data-kitchen-pb/"
 
 # Load required data
 countries <- gtalibrary::country.correspondence

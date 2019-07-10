@@ -11,8 +11,8 @@ rm(list = ls())
 file.copy("/home/rstudio/ShinyApps/data-dev/cdf.log",
           "/home/rstudio/Dropbox/GTA cloud/0 dev/data-kitchen-pb/log/chef de cuisine.log",overwrite = T)
 
-# path = "17 Shiny/4 data kitchen/"
-path = "0 dev/data-kitchen-pb/"
+path = "17 Shiny/4 data kitchen/"
+# path = "0 dev/data-kitchen-pb/"
 
 ## check if a process is running on the server
 running.processes=system("ps aux", intern=T)
