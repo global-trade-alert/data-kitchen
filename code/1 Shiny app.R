@@ -12,12 +12,12 @@ library(tidyverse)
 
 rm(list = ls())
 
-# setwd("/home/rstudio/Dropbox/GTA cloud")
+setwd("/home/rstudio/Dropbox/GTA cloud")
 # setwd("C:/Users/jfrit/Desktop/Dropbox/GTA cloud")
 # setwd("C:/Users/Piotr Lukaszuk/Dropbox/GTA cloud")
-setwd("/Users/patrickbuess/Dropbox/Collaborations/GTA cloud")
-# path = "17 Shiny/4 data kitchen/"
-path = "0 dev/data-kitchen-pb/"
+# setwd("/Users/patrickbuess/Dropbox/Collaborations/GTA cloud")
+path = "17 Shiny/4 data kitchen/"
+# path = "0 dev/data-kitchen-pb/"
 
 # Load required data
 countries <- gtalibrary::country.correspondence
@@ -54,6 +54,7 @@ product.groups <- product.groups[grepl("is.", product.groups)]
 product.groups <- gsub("is.","",product.groups)
 product.groups <- gsub("\\."," ",product.groups)
 product.groups <- tools::toTitleCase(product.groups)
+# product.groups<- c('Raw materials','Intermediate goods','Consumer goods','Capital goods','Agricultural goods')
 
 eval(parse(text=paste("products_list=c(",paste(paste("'",product.groups,"'", sep=""), collapse = ","),",",paste(paste("'", products$merged,"'='",products$HS12code,"'",sep=""), collapse=","),")")))
 
@@ -957,7 +958,7 @@ ui <- function(request) { fluidPage(
     column(4,
            tags$div(class = "create-tooltip help",
                     title = "
-                    <span>Hit brackets</span>
+                    <span>Number of interventions</span>
                     Specify whether to calculate the trade shares by the number of interventions affecting a importer-exporter-product combination e.g. '1,2,3,4,5,999999' for the brackets '1-2,3-4,5 or more'. Default is '1,99999'.
                     ",
                     tags$p("?")),

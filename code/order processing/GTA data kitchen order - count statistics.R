@@ -7,8 +7,8 @@
 
 # PROCESSING
 
-# path = "17 Shiny/4 data kitchen/"
-path = "0 dev/data-kitchen-pb/"
+path = "17 Shiny/4 data kitchen/"
+# path = "0 dev/data-kitchen-pb/"
 
 library(xlsx)
 
