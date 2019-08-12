@@ -1,4 +1,5 @@
 require(shiny)
+library(shinyjs)
 library(openxlsx)
 library(DT)
 library(shinyWidgets)
@@ -46,7 +47,7 @@ eval(parse(text=paste("sectors_list=c(",paste(paste("'", sectors$merged,"'='",se
 # create list of HS names and codes
 products <- gtalibrary::hs.names
 products$hs.name=as.character(products$hs.name)
-products$merged <- substr(paste(sprintf("%06i",as.numeric(products$HS12code)), products$hs.name, sep = " - "),1,40)
+products$merged <-  stringr::str_sub(paste(sprintf("%06i",as.numeric(products$HS12code)), products$hs.name, sep = " - "),1,40)
 products$merged=gsub("'","",products$merged)
 product.groups <- gtalibrary::hs.codes
 product.groups <- names(product.groups)
@@ -54,6 +55,7 @@ product.groups <- product.groups[grepl("is.", product.groups)]
 product.groups <- gsub("is.","",product.groups)
 product.groups <- gsub("\\."," ",product.groups)
 product.groups <- tools::toTitleCase(product.groups)
+# product.groups<- c('Raw materials','Intermediate goods','Consumer goods','Capital goods','Agricultural goods')
 
 eval(parse(text=paste("products_list=c(",paste(paste("'",product.groups,"'", sep=""), collapse = ","),",",paste(paste("'", products$merged,"'='",products$HS12code,"'",sep=""), collapse=","),")")))
 
@@ -122,14 +124,14 @@ mast_chapters = c( "A: Sanitary and phytosanitary measure" = "A",
 )
 
 source(paste0(path,"/code/modules/updateCoverages.R"))
-source(paste0(path,"/code/modules/updateDataCounts.R"), local = T)
+source(paste0(path,"/code/modules/updateDataCounts.R"))
 
 load("data/master_plus.Rdata")
 master.cols <- colnames(master)
 rm(master)
 
-
 ui <- function(request) { fluidPage(
+  useShinyjs(),
   theme = "style.css",
   tags$head(tags$link(rel="stylesheet", type="text/css", href="tipped.css")),
   tags$head(tags$script(src="tipped.js")),
@@ -197,12 +199,20 @@ ui <- function(request) { fluidPage(
                     Work with a pre-defined state of the app.
                     ",
                     tags$p("?")),
-           selectInput("predefined.data.count",
-                       label=NULL,
-                       choices = c("None" = "Unset",
-                                   "Query 1" = "query_1"),
-                       selected = "Unset"))
+           selectizeInput("predefined.data.count",
+                          label=NULL,
+                          choices = c("Default settings" = "Unset"))
     ),
+    tags$div(class="savequery-datacount",
+             tags$div(class="savequery-wrap-inner-datacount",
+                      tags$div(class="savequery-close-button-datacount"),
+                      textInput(inputId = "query.name.data.count",
+                                label="Specify a query name"),
+                      textAreaInput(inputId = "query.description.data.count", 
+                                    cols = 8,
+                                    label = "Specify a query description"),
+                      actionButton(inputId = "finish_save_query_data_count",
+                                   label = "Save query")))),
   
   
   tags$div(class = "settings-title", checked = NA,
@@ -726,8 +736,10 @@ ui <- function(request) { fluidPage(
     column(4,
            tags$div(class="generate_file-wrap", checked = NA,
                     tags$div(class="generate_file-inner", checked = NA,
+                             actionButton("save_query_data_count", label = "Save query"),
                              actionButton("generate_file_data_count",
-                                          "Submit your order"))))
+                                          "Submit your order")
+                             )))
   ),
   
   HTML("</div>"),
@@ -749,10 +761,20 @@ ui <- function(request) { fluidPage(
                     Work with a pre-defined state of the app.
                     ",
                     tags$p("?")),
-           selectInput("predefined.coverages",
+           selectizeInput("predefined.coverages",
                        label=NULL,
-                       choices = c("None" = "Unset",
-                                   "Query 1" = "query_1")))
+                       choices = c("Default settings" = "Unset"))
+           ),
+    tags$div(class="savequery",
+             tags$div(class="savequery-wrap-inner",
+                      tags$div(class="savequery-close-button"),
+                      textInput(inputId = "query.name",
+                                label="Specify a query name"),
+                      textAreaInput(inputId = "query.description", 
+                                    cols = 8,
+                                   label = "Specify a query description"),
+                      actionButton(inputId = "finish_save_query",
+                                   label = "Save query")))
     ),
   
   
@@ -957,7 +979,7 @@ ui <- function(request) { fluidPage(
     column(4,
            tags$div(class = "create-tooltip help",
                     title = "
-                    <span>Hit brackets</span>
+                    <span>Number of interventions</span>
                     Specify whether to calculate the trade shares by the number of interventions affecting a importer-exporter-product combination e.g. '1,2,3,4,5,999999' for the brackets '1-2,3-4,5 or more'. Default is '1,99999'.
                     ",
                     tags$p("?")),
@@ -1191,6 +1213,7 @@ ui <- function(request) { fluidPage(
     column(4,
            tags$div(class="generate_file-wrap", checked = NA,
                     tags$div(class="generate_file-inner", checked = NA,
+                             actionButton("save_query", label = "Save query"),
                              actionButton("generate_file",
                                           "Submit your order"))))
   ),
@@ -1205,7 +1228,14 @@ ui <- function(request) { fluidPage(
   
   tags$script(src="tooltips.js"),
   tags$script(src="app.js"),
-  HTML("</div></div></div></div>")
+  HTML("</div></div></div></div>"),
+  
+  tags$script(HTML("$('.savequery-close-button').on('click', function () {
+                            $('.savequery').toggleClass('active')
+           });")),
+  tags$script(HTML("$('.savequery-close-button-datacount').on('click', function () {
+                            $('.savequery-datacount').toggleClass('active')
+           });"))
     ) }
 
 ######## SERVER #########
@@ -1216,7 +1246,8 @@ server <- function(input, output, session) {
   observeEvent(input$predefined.data.count, {
     
     callUpdateDataCounts(session = session,
-                         query = input$predefined.data.count)
+                         query = input$predefined.data.count,
+                         path = path)
     
   })
   
@@ -1224,7 +1255,8 @@ server <- function(input, output, session) {
   observeEvent(input$predefined.coverages, {
     
     callUpdateCoverages(session = session,
-                        query = input$predefined.coverages)
+                        query = input$predefined.coverages,
+                        path = path)
     
   })
   
@@ -1433,6 +1465,82 @@ server <- function(input, output, session) {
   })
   
   
+  # SAVE QUERY INPUT COVERAGES
+  observeEvent(input$save_query, {
+    shinyjs::addClass(selector = ".savequery", class = "active")
+  })
+  
+  # SAVE QUERY INPUT DATA COUNTS
+  observeEvent(input$save_query_data_count, {
+    shinyjs::addClass(selector = ".savequery-datacount", class = "active")
+  })
+  
+  # FINISH SAVING PROCESS COERAGES
+  observeEvent(input$finish_save_query, {
+    
+    source(paste0(path,"code/functions/saveQueryCoverage.R"))
+    
+    saveQueryCoverage(session = session,
+                      path = path,
+                      title = input$query.name,
+                      description = input$query.description,
+                      input = reactiveValuesToList(input))
+  })
+  
+  # FINISH SAVING PROCESS COERAGES
+  observeEvent(input$finish_save_query_data_count, {
+    
+    source(paste0(path,"code/functions/saveQueryDataCount.R"))
+    
+    saveQueryDataCount(session = session,
+                      path = path,
+                      title = input$query.name.data.count,
+                      description = input$query.description.data.count,
+                      input = reactiveValuesToList(input))
+  })
+  
+  
+  # LOAD QUERY FUNCTIONS COVERAGES
+  queriesdf <- data.frame()
+  for(fct in list.files(paste0(path,"/code/modules/queries/coverages"), pattern = ".R", full.names=T)){
+    source(fct)
+    eval(parse(text=paste0("title = ",gsub(".R","",basename(fct)),"(session = session, type = 'title')")))
+    eval(parse(text=paste0("description = ",gsub(".R","",basename(fct)),"(session = session, type = 'description')")))
+    queriesdf <- rbind(queriesdf, data.frame(title = title,
+                                             description = description,
+                                             value = gsub(".R","",basename(fct))))
+  }
+  
+  # LOAD QUERY FUNCTIONS COVERAGES
+  queriesdf_datacount <- data.frame()
+  for(fct in list.files(paste0(path,"/code/modules/queries/datacounts"), pattern = ".R", full.names=T)){
+    source(fct)
+    eval(parse(text=paste0("title = ",gsub(".R","",basename(fct)),"(session = session, type = 'title')")))
+    eval(parse(text=paste0("description = ",gsub(".R","",basename(fct)),"(session = session, type = 'description')")))
+    queriesdf_datacount <- rbind(queriesdf_datacount, data.frame(title = title,
+                                             description = description,
+                                             value = gsub(".R","",basename(fct))))
+  }
+  
+  # UPDATE QUERY LIST COVERAGES
+  updateSelectizeInput(
+    session, 'predefined.coverages', server = TRUE,
+    choices = rbind(data.frame(title = "Unset", description = "Default Settings", value = "Unset"), queriesdf),
+    options = list(render = I("
+                    {
+                      item: function(item, escape) { return '<div>' + item.title + '</div>'; },
+                      option: function(item, escape) { return '<div><strong>' + item.title + '</strong><br />' + item.description + '</div>'; }
+                    }")))
+  
+  # UPDATE QUERY LIST DATACOUNTS
+  updateSelectizeInput(
+    session, 'predefined.data.count', server = TRUE,
+    choices = rbind(data.frame(title = "Unset", description = "Default Settings", value = "Unset"), queriesdf_datacount),
+    options = list(render = I("
+                    {
+                      item: function(item, escape) { return '<div>' + item.title + '</div>'; },
+                      option: function(item, escape) { return '<div><strong>' + item.title + '</strong><br />' + item.description + '</div>'; }
+                    }")))
   
 }
 
