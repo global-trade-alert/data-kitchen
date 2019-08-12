@@ -1,28 +1,33 @@
 callUpdateDataCounts <- function(session,
-                                 query = NULL) {
-  
+                                 query = NULL, 
+                                 path = NULL) {
+    
+    if(is.null(path)) {
+      stop("Please specify path")
+    }
+    
+  for(fct in list.files(paste0(path,"/code/modules/queries/datacounts"), pattern = ".R", full.names=T)){
+    source(fct)
+  }
   
   if (is.null(query)==F) {
     
     if (query == "Unset") {
       
       updateDataCounts(session = session)
-    }
     
-    if (query == "query_1") {
-      
+      } else {
+    
       updateDataCounts(session = session)
-      updateDataCounts(session = session,
-                       gta.evaluation.data.count = c("Red","Amber"),
-                       implementers.data.count = c("United States of America","China"),
-                       affected.data.count = c("G20"))
+        
+      eval(parse(text=paste0(query,"(session = session)")))
+        
+      
     }
     
   }
   
 }
-
-
 
 updateDataCounts <- function(session,
                              gta.evaluation.data.count = "",
@@ -62,8 +67,17 @@ updateDataCounts <- function(session,
                              keep.hs.data.count = TRUE,
                              intervention.ids.data.count = "",
                              keep.interventions.data.count = TRUE,
-                             lag.adjustment.data.count = NA) {
+                             lag.adjustment.data.count = NA,
+                             aggregate.y.data.count = NA,
+                             aggregate.x.data.count = c("Implemented (year)" = "year(date.implemented)")) {
   
+  updateSelectInput(session,
+                    "aggregate.y.data.count",
+                    selected = aggregate.y.data.count)
+  
+  updateSelectInput(session,
+                    "aggregate.x.data.count",
+                    selected = aggregate.x.data.count)
   
   updateSelectInput(session,
                     "gta.evaluation.data.count",

@@ -1,28 +1,32 @@
 callUpdateCoverages <- function(session,
-                                query = NULL) {
+                                query = NULL,
+                                path = NULL) {
   
+  if(is.null(path)) {
+    stop("Please specify path")
+  }
+  
+  for(fct in list.files(paste0(path,"/code/modules/queries/coverages"), pattern = ".R", full.names=T)){
+    source(fct)
+  }
   
   if (is.null(query)==F) {
     
     if (query == "Unset") {
-      updateCoverages(session = session)
-    }
-    
-    
-    if (query == "query_1") {
       
       updateCoverages(session = session)
       
-      updateCoverages(session = session,
-                      gta.evaluation = c("Red","Amber"),
-                      importers = c("United States of America","China"),
-                      exporters = c("G20"))
-    }
+    } else {
     
+    updateCoverages(session = session)
+    # print(paste0("q",query,"(session = session)"))
+    eval(parse(text=paste0(query,"(session = session)")))
+    # print("Another one")
+    
+    }
   }
   
 }
-
 
 updateCoverages <- function(session,
                             gta.evaluation = "",
@@ -54,8 +58,8 @@ updateCoverages <- function(session,
                             intervention.ids = "",
                             keep.interventions = TRUE,
                             lag.adjustment = NA,
-                            coverage.period = "",
-                            current.year.todate = c(2009, year(Sys.Date())),
+                            coverage.period = c(2009,year(Sys.Date())),
+                            current.year.todate = T,
                             choose.tradebase = "base",
                             choose.output = "share",
                             adjust.for.intra = TRUE,
@@ -81,7 +85,6 @@ updateCoverages <- function(session,
                             hit.brackets = "",
                             group.type = TRUE,
                             group.mast = TRUE
-                            
 ) {
   
   
@@ -202,9 +205,7 @@ updateCoverages <- function(session,
   updateDateInput(session,
                   "lag.adjustment",
                   value = lag.adjustment)
-  
-  
-  
+
   updateSliderInput(session,
                     "coverage.period",
                     value = coverage.period)
