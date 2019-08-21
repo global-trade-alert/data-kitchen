@@ -298,6 +298,8 @@ tryCatch({
     master <- list(master, master.sliced)
     p.choices <- list(p.choices, parameter.choice.slicer)
     kitchen.rows <- list(kl, kl2)
+  } else {
+    kitchen.rows <- list(kl)
   }
   
   
@@ -307,7 +309,7 @@ tryCatch({
     
     error.message <<- c(F,"")
     
-    rm(gta.eval,a.flow,ij,aff,a.period,i.period,r.period,s.period,ift,i.types,mast,il,ef,cpc,hs,int.id,lag, a.a.nr)
+    rm(gta.eval,a.flow,ij,aff,a.period,i.period,r.period,s.period,ift,i.types,mast,il,ef,cpc,hs,int.id,lag)
     
     
     # Helper vector to append values to excel file
