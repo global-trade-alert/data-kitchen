@@ -10,8 +10,8 @@ library(openxlsx)
 
 # PROCESSING
 
-path = "17 Shiny/4 data kitchen/"
-# path = "0 dev/data-kitchen-pb/"
+# path = "17 Shiny/4 data kitchen/"
+path = "0 dev/data-kitchen-pb/"
 
 tryCatch({
   
@@ -279,13 +279,13 @@ tryCatch({
   # CALCULATE ALL VALUES IF NECESSARY
   if(length(additional.all)>0) {
     
-    types = list(c("imps", "group.importers","Importers"),
-                 c("exps", "group.exporters","Exporters"),
-                 c("ij", "group.implementers","Implementers"),
-                 c("cpc", "group.cpc","CPC Sectors"),
-                 c("hs", "group.hs","HS Codes"),
-                 c("mast", "group.mast","MAST Chapters"),
-                 c("i.types", "group.types","Intervention types"))
+    types = list(c("imps", "group.importers","Importers","Importing country"),
+                 c("exps", "group.exporters","Exporters","Exporting country"),
+                 c("ij", "group.implementers","Implementers","Implementers"),
+                 c("cpc", "group.cpc","CPC Sectors","CPC Sectors"),
+                 c("hs", "group.hs","HS Codes","HS Codes"),
+                 c("mast", "group.mast","MAST chapters","MAST chapter name"),
+                 c("i.types", "group.type","Intervention types","Intervention types"))
     
     for (i in 1:length(types)) {
       if(types[[i]][1] %in% additional.all) {
@@ -356,9 +356,17 @@ tryCatch({
     
     for (i in 1:length(types)) {
       if(types[[i]][1] %in% additional.all) {
-        eval(parse(text=paste0("results.2$`",types[[i]][3],"` = 'All ",types[[i]][3],"'")))
-        eval(parse(text=paste0("results$`",types[[i]][3],"` = 'Selected ",types[[i]][3],"'")))
+        eval(parse(text=paste0("results.2$`",types[[i]][4],"` = 'All ", types[[i]][3]," in the GTA'")))
+        eval(parse(text=paste0("results$`",types[[i]][3],"` = 'Selected ", types[[i]][3],"'")))
       }
+    }
+    
+    # CHECK IF NUMBER OF COLUMNS ARE DIFFERENT
+    if (ncol(results) != ncol(results.2)) {
+      names.diff <- (names(results)[! names(results) %in% names(results.2)])
+     for (n in names.diff) {
+       results.2[n] <- paste0("All ",n) 
+     }
     }
     
     results <- rbind(results, results.2)

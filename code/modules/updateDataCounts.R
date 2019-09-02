@@ -30,8 +30,8 @@ callUpdateDataCounts <- function(session,
 }
 
 updateDataCounts <- function(session,
-                             gta.evaluation.data.count = "",
-                             affected.flows.data.count = "",
+                             gta.evaluation.data.count = c("Red", "Amber", "Green"),
+                             affected.flows.data.count = c("Inward","Outward","Outward subsidy"),
                              implementers.data.count = "all",
                              keep.implementer.data.count = TRUE,
                              group.implementer.data.count = TRUE,
@@ -69,7 +69,44 @@ updateDataCounts <- function(session,
                              keep.interventions.data.count = TRUE,
                              lag.adjustment.data.count = NA,
                              aggregate.y.data.count = NA,
-                             aggregate.x.data.count = c("Implemented (year)" = "year(date.implemented)")) {
+                             aggregate.x.data.count = c("Implemented (year)" = "year(date.implemented)"),
+                             xlsx.data.count = TRUE,
+                             interventions.list.data.count = FALSE,
+                             line.data.count = FALSE,
+                             bar.data.count = FALSE,
+                             map.data.count = FALSE,
+                             tile.data.count = FALSE,
+                             line.title.data.count = "",
+                             line.legend.title.data.count = "",
+                             line.x.axis.title.data.count = "",
+                             line.y.axis.title.data.count = "",
+                             line.colour.data.count = "gta_colour$qualitative",
+                             line.y.var.data.count = "",
+                             line.group.var.data.count = "",
+                             bar.title.data.count = "",
+                             bar.legend.title.data.count = "",
+                             bar.x.axis.title.data.count = "",
+                             bar.y.axis.title.data.count = "",
+                             bar.colour.data.count = "gta_colour$qualitative",
+                             bar.y.var.data.count = "",
+                             bar.group.var.data.count = "",
+                             map.title.data.count = "",
+                             map.legend.title.data.count = "",
+                             map.colour.low.data.count = "gta_colour$green[1]",
+                             map.colour.high.data.count = "gta_colour$red[1]",
+                             map.countries.data.count = "",
+                             map.value.data.count = "",
+                             map.splits.data.count = 3,
+                             map.brackets.data.count = "",
+                             tile.title.data.count = "",
+                             tile.legend.title.data.count = "",
+                             tile.x.axis.title.data.count = "",
+                             tile.y.axis.title.data.count = "",
+                             tile.colour.low.data.count = "gta_colour$green[1]",
+                             tile.colour.high.data.count = "gta_colour$red[1]",
+                             tile.x.var.data.count = "",
+                             tile.y.var.data.count = "",
+                             tile.value.var.data.count = "")  {
   
   updateSelectInput(session,
                     "aggregate.y.data.count",
@@ -267,7 +304,129 @@ updateDataCounts <- function(session,
   updateDateInput(session,
                   "lag.adjustment.data.count",
                   value = lag.adjustment.data.count)
-  
-  
-  
+
+
+# PLOT VALUES
+updateCheckboxInput(session,
+                    "xlsx.data.count",
+                    value = xlsx.data.count)
+updateCheckboxInput(session,
+                    "interventions.list.data.count",
+                    value = interventions.list.data.count)
+updateCheckboxInput(session,
+                    "line.data.count",
+                    value = line.data.count)
+updateCheckboxInput(session,
+                    "bar.data.count",
+                    value = bar.data.count)
+updateCheckboxInput(session,
+                    "map.data.count",
+                    value = map.data.count)
+updateCheckboxInput(session,
+                    "tile.data.count",
+                    value = tile.data.count)
+
+# LINE
+updateTextInput(session,
+                "line.title.data.count",
+                value = line.title.data.count)
+updateTextInput(session,
+                "line.legend.title.data.count",
+                value = line.legend.title.data.count)
+updateTextInput(session,
+                "line.x.axis.title.data.count",
+                value = line.x.axis.title.data.count)
+updateTextInput(session,
+                "line.y.axis.title.data.count",
+                value = line.y.axis.title.data.count)
+updateSelectInput(session,
+                  "line.colour.data.count",
+                  selected = line.colour.data.count)
+updateSelectInput(session,
+                  "line.y.var.data.count",
+                  selected = line.y.var.data.count)
+updateSelectInput(session,
+                  "line.group.var.data.count",
+                  selected = line.group.var.data.count)
+
+# BAR
+updateTextInput(session,
+                "bar.title.data.count",
+                value = bar.title.data.count)
+updateTextInput(session,
+                "bar.legend.title.data.count",
+                value = bar.legend.title.data.count)
+updateTextInput(session,
+                "bar.x.axis.title.data.count",
+                value = bar.x.axis.title.data.count)
+updateTextInput(session,
+                "bar.y.axis.title.data.count",
+                value = bar.y.axis.title.data.count)
+updateSelectInput(session,
+                  "bar.colour.data.count",
+                  selected = bar.colour.data.count)
+updateSelectInput(session,
+                  "bar.y.var.data.count",
+                  selected = bar.y.var.data.count)
+updateSelectInput(session,
+                  "bar.group.var.data.count",
+                  selected = bar.group.var.data.count)
+
+# MAP
+updateTextInput(session,
+                "map.title.data.count",
+                value = map.title.data.count)
+updateTextInput(session,
+                "map.legend.title.data.count",
+                value = map.legend.title.data.count)
+updateSelectInput(session,
+                  "map.colour.low.data.count",
+                  selected = map.colour.low.data.count)
+updateSelectInput(session,
+                  "map.colour.high.data.count",
+                  selected = map.colour.high.data.count)
+updateSelectInput(session,
+                  "map.countries.data.count",
+                  selected = map.countries.data.count)
+updateSelectInput(session,
+                  "map.value.data.count",
+                  selected = map.value.data.count)
+updateNumericInput(session,
+                   "map.splits.data.count",
+                   value = map.splits.data.count)
+updateTextInput(session,
+                "map.brackets.data.count",
+                value = map.brackets.data.count)
+
+# TILE
+updateTextInput(session,
+                "tile.title.data.count",
+                value = tile.title.data.count)
+updateTextInput(session,
+                "tile.legend.title.data.count",
+                value = tile.legend.title.data.count)
+updateTextInput(session,
+                "tile.x.axis.title.data.count",
+                value = tile.x.axis.title.data.count)
+updateTextInput(session,
+                "tile.y.axis.title.data.count",
+                value = tile.y.axis.title.data.count)
+updateSelectInput(session,
+                  "tile.colour.low.data.count",
+                  selected = tile.colour.low.data.count)
+updateSelectInput(session,
+                  "tile.colour.high.data.count",
+                  selected = tile.colour.high.data.count)
+updateSelectInput(session,
+                  "tile.x.var.data.count",
+                  selected = tile.x.var.data.count)
+updateSelectInput(session,
+                  "tile.y.var.data.count",
+                  selected = tile.y.var.data.count)
+updateSelectInput(session,
+                  "tile.value.var.data.count",
+                  selected = tile.value.var.data.count)
+
+
 }
+

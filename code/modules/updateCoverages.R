@@ -29,8 +29,8 @@ callUpdateCoverages <- function(session,
 }
 
 updateCoverages <- function(session,
-                            gta.evaluation = "",
-                            affected.flows = "",
+                            gta.evaluation = c("Red", "Amber", "Green"),
+                            affected.flows = c("Inward","Outward","Outward subsidy"),
                             implementers = "all",
                             keep.implementer = TRUE,
                             affected = "all",
