@@ -225,14 +225,14 @@ tryCatch({
   if (kl$interventions.list==T) {
     
     interventions.list <- master.sliced
-    interventions.list$url <- paste("https://www.globaltradealert.org/state-act/", interventions.list$state.act.id, sep="")
+    interventions.list$url <- paste("https://www.globaltradealert.org/intervention/", interventions.list$intervention.id, sep="")
     interventions.list <- interventions.list[,c("intervention.id","url","implementing.jurisdiction","intervention.type","gta.evaluation","title")]
     names(interventions.list) <- c("ID","URL","Implementer","Instrument","Evaluation","Title")
     interventions.list <- unique(interventions.list)
     
     # eval(parse(text=paste0("xlsxList = list('",sheetnames.int[i],"' = interventions.list, '",sheetnames.int[i+2],"' = parameter.choice.slicer)")))
     # xlsxList <- list(paste0(sheetnames.int[i]) = interventions.list, paste0(sheetnames.int[i+2]) = parameter.choice.slicer)
-    write.xlsx(x=interventions.list, file = paste(path,"results/Interventions list from ", Sys.Date(),".xlsx", sep=""), sheetName = "Interventions list", rowNames = F, append = F)
+    write.xlsx(x=interventions.list, file = paste(path,"results/Interventions list from ", Sys.Date(),".xlsx", sep=""), sheetName = "Interventions list", row.names = F, append = F)
     write.xlsx(x=parameter.choice.slicer, file = paste(path,"results/Interventions list from ", Sys.Date(),".xlsx", sep=""), sheetName = "Parameter choices", append = T, row.names = F)
     rm(interventions.list)
   }
