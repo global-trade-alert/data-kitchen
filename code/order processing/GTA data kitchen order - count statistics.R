@@ -3,7 +3,7 @@
 # library(gtalibrary)
 # setwd("/Users/patrickbuess/Dropbox/Collaborations/GTA cloud")
 # load("0 dev/data-kitchen-pb/log/kitchen log.Rdata")
-# kl = kitchen.log[nrow(kitchen.log)-1,]
+# kl = kitchen.log[830,]
 
 # PROCESSING
 
@@ -386,6 +386,9 @@ tryCatch({
       if (kl$xlsx == T) {
         
         if( (length(agg.x)>1) & TRUE %in% grepl("year", agg.x) ){
+          
+          column.year <- agg.x[grepl("year", agg.x)]
+          eval(parse(text=paste0("agg <- agg[with(agg, order(`",column.year,"`)),]")))
           
           agg.xlsx=reshape(agg, idvar=agg.x[grepl("year", agg.x)==F], timevar =agg.x[grepl("year", agg.x)==T] , direction="wide")
           
