@@ -2,8 +2,8 @@
 #
 # library(gtalibrary)
 # setwd("/Users/patrickbuess/Dropbox/Collaborations/GTA cloud")
-# load("0 dev/data-kitchen-pb/log/kitchen log.Rdata")
-# kl = kitchen.log[830,]
+# load("17 Shiny/4 data kitchen/log/kitchen log.Rdata")
+# kl = kitchen.log[832,]
 
 # PROCESSING
 
@@ -391,6 +391,11 @@ tryCatch({
           eval(parse(text=paste0("agg <- agg[with(agg, order(`",column.year,"`)),]")))
           
           agg.xlsx=reshape(agg, idvar=agg.x[grepl("year", agg.x)==F], timevar =agg.x[grepl("year", agg.x)==T] , direction="wide")
+          
+          if (TRUE %in% grepl("jurisdiction", agg.x)) {
+            sort.jurisdictions <- agg.x[grepl("jurisdiction", agg.x)]
+            eval(parse(text=paste0("agg.xlsx <- agg.xlsx[with(agg.xlsx, order(",paste0(sort.jurisdictions, collapse = ", "),")),]")))
+          }
           
           names(agg.xlsx)=gsub(paste(as.character(agg.y),".", sep=""),"", names(agg.xlsx))
           
