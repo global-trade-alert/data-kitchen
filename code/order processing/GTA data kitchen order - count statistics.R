@@ -240,7 +240,7 @@ tryCatch({
     # MAKE SECOND KL ROW TO BE ABLE TO CHANGE VALUE IN IT WHERE NECESSARY
     kl2 <- as.data.frame(kl)
     
-    types = list(c("aff", "group.affected","Affected jurisdictions","affected.jurisdiction"),
+    types = list(c("aff", "group.affected","Affected jurisdictions","affected.jurisdiction" ),
                  c("ij", "group.implementer","Implementing jurisdictions","implementing.jurisdiction"),
                  c("cpc", "group.cpc","CPC Sectors","affected.sector"),
                  c("hs", "group.hs","HS Codes","affected.product"),
@@ -506,13 +506,21 @@ tryCatch({
         order.list <- order.list[order.list %in% names(master.xlsx)]
         master.xlsx <- master.xlsx[order.list]
       
-      # WRITE EXCEL
+      # ADD "ALL" PARAMETER CHOICES TO A SINGLE PARAMTER CHOICES DF
       if (length(master) > 1) {
-        xlsx <- list("Data Counts" = master.1, "Parameter Choices" = p.choices[[1]], "Parameter Choices (All)" = p.choices[[2]])
-      } else {
-        xlsx <- list("Data Counts" = master.1, "Parameter Choices" = p.choices[[1]])  
+        p.choices.1 <- as.data.frame(p.choices[[1]])
+        p.choices.2 <- as.data.frame(p.choices[[2]])
+        for (r in 1:nrow(p.choices.1)){
+          second.value <- p.choices.2$parameter[p.choices.2$parameter == p.choices.1[r,1]]
+          if (p.choices.1[r,2] != p.choices.2$choice[p.choices.2$parameter == second.value]) {
+            p.choices.1$Parameter.Choices.choice[r] <- paste0(p.choices.1$Parameter.Choices.choice[r], " + All")
+          }
+        }
       }
-      openxlsx::write.xlsx(x=master.xlsx, file = paste(path,"results/Count statistics from ", Sys.Date(),".xlsx", sep=""), rowNames = F)
+      
+      # WRITE EXCEL
+      xlsx <- list("Data Counts" = master.xlsx, "Parameter Choices" = p.choices.1)
+      openxlsx::write.xlsx(x=xlsx, file = paste(path,"results/Count statistics from ", Sys.Date(),".xlsx", sep=""), rowNames = F)
 
     }
     
