@@ -229,7 +229,7 @@ tryCatch({
     interventions.list$url <- paste("https://www.globaltradealert.org/intervention/", interventions.list$intervention.id, sep="")
     interventions.list <- interventions.list[,c("intervention.id","url","implementing.jurisdiction","intervention.type","gta.evaluation","title")]
     names(interventions.list) <- c("ID","URL","Implementer","Instrument","Evaluation","Title")
-    interventions.park <- unique(interventions.list)
+    interventions.parked <- unique(interventions.list)
   
   }
   
@@ -302,7 +302,7 @@ tryCatch({
       interventions.list$url <- paste("https://www.globaltradealert.org/intervention/", interventions.list$intervention.id, sep="")
       interventions.list <- interventions.list[,c("intervention.id","url","implementing.jurisdiction","intervention.type","gta.evaluation","title")]
       names(interventions.list) <- c("ID","URL","Implementer","Instrument","Evaluation","Title")
-      interventions.park <- unique(rbind(interventions.park, interventions.list))
+      interventions.parked <- unique(rbind(interventions.parked, interventions.list))
       
     }
     
