@@ -1,16 +1,17 @@
 # # UNCOMMENT FOR TESTING
 #
+# rm(list=ls())
 # library(gtalibrary)
 # setwd("/Users/patrickbuess/Dropbox/Collaborations/GTA cloud")
-# load("17 Shiny/4 data kitchen/log/kitchen log.Rdata")
-# kl = kitchen.log[832,]
+# load("0 dev/data-kitchen-pb/log/kitchen log.Rdata")
+# kl = kitchen.log[nrow(kitchen.log),]
 
 # PROCESSING
 
 path = "17 Shiny/4 data kitchen/"
 # path = "0 dev/data-kitchen-pb/"
 
-library(xlsx)
+library(openxlsx)
 
 tryCatch({
   
@@ -219,7 +220,7 @@ tryCatch({
   )
   
   master <- list(master.sliced)
-  p.choices <- list(parameter.choice.slicer)
+  p.choices <- list("Parameter Choices" = parameter.choice.slicer)
   
   # Only make interventions list from selected part, because including "All" values would make it too large
   if (kl$interventions.list==T) {
@@ -228,13 +229,8 @@ tryCatch({
     interventions.list$url <- paste("https://www.globaltradealert.org/intervention/", interventions.list$intervention.id, sep="")
     interventions.list <- interventions.list[,c("intervention.id","url","implementing.jurisdiction","intervention.type","gta.evaluation","title")]
     names(interventions.list) <- c("ID","URL","Implementer","Instrument","Evaluation","Title")
-    interventions.list <- unique(interventions.list)
-    
-    # eval(parse(text=paste0("xlsxList = list('",sheetnames.int[i],"' = interventions.list, '",sheetnames.int[i+2],"' = parameter.choice.slicer)")))
-    # xlsxList <- list(paste0(sheetnames.int[i]) = interventions.list, paste0(sheetnames.int[i+2]) = parameter.choice.slicer)
-    write.xlsx(x=interventions.list, file = paste(path,"results/Interventions list from ", Sys.Date(),".xlsx", sep=""), sheetName = "Interventions list", row.names = F, append = F)
-    write.xlsx(x=parameter.choice.slicer, file = paste(path,"results/Interventions list from ", Sys.Date(),".xlsx", sep=""), sheetName = "Parameter choices", append = T, row.names = F)
-    rm(interventions.list)
+    interventions.park <- unique(interventions.list)
+  
   }
   
   
@@ -244,12 +240,13 @@ tryCatch({
     # MAKE SECOND KL ROW TO BE ABLE TO CHANGE VALUE IN IT WHERE NECESSARY
     kl2 <- as.data.frame(kl)
     
-    types = list(c("aff", "group.affected","Affected jurisdictions"),
-                 c("ij", "group.implementer","Implementing jurisdiction"),
-                 c("cpc", "group.cpc","CPC Sectors"),
-                 c("hs", "group.hs","HS Codes"),
-                 c("mast", "group.mast","MAST Chapters"),
-                 c("i.types", "group.types","Intervention types"))
+    types = list(c("aff", "group.affected","Affected jurisdictions","affected.jurisdiction"),
+                 c("ij", "group.implementer","Implementing jurisdictions","implementing.jurisdiction"),
+                 c("cpc", "group.cpc","CPC Sectors","affected.sector"),
+                 c("hs", "group.hs","HS Codes","affected.product"),
+                 c("mast", "group.mast","MAST Chapters","mast.chapter"),
+                 c("i.types", "group.types","Intervention types","intervention.type"))
+    
     
     for (i in 1:length(types)) {
       if(types[[i]][1] %in% additional.all) {
@@ -296,8 +293,19 @@ tryCatch({
     )
     
     master <- list(master, master.sliced)
-    p.choices <- list(p.choices, parameter.choice.slicer)
+    p.choices <- list("Parameter Choices" = p.choices, "Parameter Choices (All)" = parameter.choice.slicer)
     kitchen.rows <- list(kl, kl2)
+    
+    if (kl$interventions.list==T) {
+      
+      interventions.list <- master.sliced
+      interventions.list$url <- paste("https://www.globaltradealert.org/intervention/", interventions.list$intervention.id, sep="")
+      interventions.list <- interventions.list[,c("intervention.id","url","implementing.jurisdiction","intervention.type","gta.evaluation","title")]
+      names(interventions.list) <- c("ID","URL","Implementer","Instrument","Evaluation","Title")
+      interventions.park <- unique(rbind(interventions.park, interventions.list))
+      
+    }
+    
   } else {
     kitchen.rows <- list(kl)
   }
@@ -312,19 +320,15 @@ tryCatch({
     rm(gta.eval,a.flow,ij,aff,a.period,i.period,r.period,s.period,ift,i.types,mast,il,ef,cpc,hs,int.id,lag)
     
     
-    # Helper vector to append values to excel file
-    append.helper <- c(FALSE, TRUE)
-    sheetnames.int <- c("Interventions List", "Interv. List (All)", "Parameter choices", "Param Ch. (All)")
-    sheetnames.counts <- c("Count statistics", "Count statistics (All)", "Parameter choices", "Param Ch. (All)")
+    #################################################
+    #
+    #   AGG EXCEL AND INTERVENTIONS
+    #
+    #################################################
     
     # Processing of sliced master dataset
-    
-    for (i in 1:length(master)){
       
-      
-      kl <- kitchen.rows[[i]]
-      master.sliced <- as.data.frame(master[[i]])
-      parameter.choice.slicer <- as.data.frame(p.choices[[i]])
+    create.master.xlsx <- function(master.sliced = NULL, kl = NULL, parameter.choice.slicer = NULL, master.first = F) {
       
       if (kl$aggregate.y=="affected.product") {
         master.sliced <- cSplit(master.sliced, which(colnames(master.sliced)=="affected.product"), direction="long", sep=",")
@@ -376,53 +380,160 @@ tryCatch({
       
       
       agg.x <- unique(agg.x)
+      agg.x <<- agg.x
       eval(parse(text=paste0("agg <- aggregate(",agg.y," ~ ",paste(agg.x, collapse = "+"), ", master.sliced, function(x) ", agg.style, ")")))
       
       agg[is.na(agg)] <- 0
       
       # Backup "agg" for later use with plots
-      if(i==1){agg.temp <- agg}
-      
-      if (kl$xlsx == T) {
-        
-        if( (length(agg.x)>1) & TRUE %in% grepl("year", agg.x) ){
-          
-          column.year <- agg.x[grepl("year", agg.x)]
-          eval(parse(text=paste0("agg <- agg[with(agg, order(`",column.year,"`)),]")))
-          
-          agg.xlsx=reshape(agg, idvar=agg.x[grepl("year", agg.x)==F], timevar =agg.x[grepl("year", agg.x)==T] , direction="wide")
-          
-          if (TRUE %in% grepl("jurisdiction", agg.x)) {
-            sort.jurisdictions <- agg.x[grepl("jurisdiction", agg.x)]
-            eval(parse(text=paste0("agg.xlsx <- agg.xlsx[with(agg.xlsx, order(",paste0(sort.jurisdictions, collapse = ", "),")),]")))
-          }
-          
-          names(agg.xlsx)=gsub(paste(as.character(agg.y),".", sep=""),"", names(agg.xlsx))
-          
-          agg.xlsx[is.na(agg.xlsx)]=0
-          # eval(parse(text=paste0("xlsxList = list('",sheetnames.counts[i],"' = agg.xlsx, '",sheetnames.counts[i+2],"' = parameter.choice.slicer)")))
-          # xlsxList = list(paste0(sheetnames.counts[i]) = agg.xlsx, paste0(sheetnames.counts[i+2]) = parameter.choice.slicer)
-          write.xlsx(x=agg.xlsx, file = paste(path,"results/Count statistics from ", Sys.Date(),".xlsx", sep=""), sheetName = sheetnames.counts[i], row.names = F, append = append.helper[i])
-          write.xlsx(x=parameter.choice.slicer, file = paste(path,"results/Count statistics from ", Sys.Date(),".xlsx", sep=""), sheetName = sheetnames.counts[i+2], append=T, row.names = F)
-          
-          
-        } else{
-          # eval(parse(text=paste0("xlsxList = list('",sheetnames.counts[i],"' = agg, '",sheetnames.counts[i+2],"' = parameter.choice.slicer)")))
-          # xlsxList = list(paste0(sheetnames.counts[i]) = agg, paste0(sheetnames.counts[i+2]) = parameter.choice.slicer)
-          write.xlsx(x=agg, file = paste(path,"results/Count statistics from ", Sys.Date(),".xlsx", sep=""), sheetName = sheetnames.counts[i],row.names = F, append = append.helper[i])
-          write.xlsx(x=parameter.choice.slicer, file = paste(path,"results/Count statistics from ", Sys.Date(),".xlsx", sep=""), sheetName = sheetnames.counts[i+2], append=T, row.names = F)
-          
-          
-        }
-        
+      if(master.first==T){
+        agg.temp <<- agg
       }
+      
+      return(agg)
       
     }
     
-    gta_colour_palette()
+    # CREATE MASTER 1 FROM AGG SETTINGS
+    master.1 <- create.master.xlsx(master.sliced = as.data.frame(master[[1]]),
+                                   kl = as.data.frame(kitchen.rows[[1]]),
+                                   parameter.choice.slicer = as.data.frame(p.choices[[1]]),
+                                   master.first=T)
+    # agg.both <- agg.x
+    master.xlsx <- master.1
     
+    
+    if (kl$xlsx == T) {
+      if (length(master) > 1) {
+      
+      # CREATE MASTER 2 WITH "ALL" VALUES IN IT
+      master.2 <- create.master.xlsx(master.sliced = as.data.frame(master[[2]]),
+                                     kl = as.data.frame(kitchen.rows[[2]]),
+                                     parameter.choice.slicer = as.data.frame(p.choices[[2]]))
+      
+      # agg.both <- unique(c(agg.both, agg.x))
+      
+      
+      # ADD INDICATOR COLUMNS FOR ALL/SELECTED
+      for (i in 1:length(types)) {
+        if(types[[i]][1] %in% additional.all &  ! types[[i]][4] %in% agg.x) {
+          if (types[[i]][4] %in% names(master.1)) {
+            eval(parse(text=paste0("master.2$`",types[[i]][4],"` = 'All ", types[[i]][3]," in the GTA'")))
+          } else {
+            eval(parse(text=paste0("master.2$`",types[[i]][4],"` = 'All ", types[[i]][3]," in the GTA'")))
+            eval(parse(text=paste0("master.1$`",types[[i]][4],"` = 'Selected ", types[[i]][3],"'")))
+          }
+        }
+      }
+      
+      # CHECK IF NUMBER OF COLUMNS ARE DIFFERENT AND FILL THEM WITH "ALL" INDICATORS IF SO
+      if (ncol(master.1) != ncol(master.2)) {
+        names.diff <- (names(master.1)[! names(master.1) %in% names(master.2)])
+        for (n in names.diff) {
+              master.2[n] <- paste0("All ",n) 
+          }
+      }
+      master.1$orderCol <- 1 # ADD ORDER COLUMN FOR SETTING THE "SELECTED" VALUES ON TOP LATER
+      master.2$orderCol <- 2
+      master.xlsx <- rbind(master.1, master.2)
+      }
+
+      # IF YEAR(...) IS IN AGG.X, RESHAPE THE FILE
+    if(length(agg.x)>1 &  TRUE %in% grepl("year", agg.x) ){
+      
+      column.year <- agg.x[grepl("year", agg.x)]
+      eval(parse(text=paste0("agg <- master.xlsx[with(master.xlsx, order(`",column.year,"`)),]")))
+      
+     if(as.character(kl$aggregate.y)!=""){
+      agg.y=paste(unlist(strsplit(as.character(kl$aggregate.y),",")))}else{agg.y=NULL}
+    
+      agg.x <- c(names(master.xlsx))
+      agg.x <- agg.x[agg.x != agg.y]
+      
+      agg.xlsx=reshape(agg, idvar=agg.x[grepl("year", agg.x)==F], timevar =agg.x[grepl("year", agg.x)==T] , direction="wide")
+      
+      names(agg.xlsx)=gsub(paste(as.character(agg.y),".", sep=""),"", names(agg.xlsx))
+      
+      
+      agg.xlsx[is.na(agg.xlsx)]=0
+      
+      master.xlsx <- agg.xlsx
+      
+      }
+      
+      # SORT DATASET, FIRST BY ALL/SELECTED, THEN JURISDICTION NAMES
+      
+      master.xlsx.names <- names(master.xlsx)
+      master.xlsx.names <- gsub("\\(",".",gsub("\\)","",master.xlsx.names))
+      colnames(master.xlsx) <- master.xlsx.names
+      
+      # order columns
+      order.list <- c("orderCol",
+                      "year.date.implemented",
+                      "month.date.implemented",
+                      "year.date.announced",
+                      "month.date.announced",
+                      "year.date.removed",
+                      "month.date.removed",
+                      "year.date.published",
+                      "month.date.published",
+                      "affected.jurisdiction",
+                      "implementing.jurisdiction",
+                      "intervention.type",
+                      "affected.product",
+                      "affected.sector",
+                      "mast.chapter",
+                      "implementation.level",
+                      "gta.evaluation",
+                      "gta.evaluation.harmful.liberalising",
+                      "intervention.id",
+                      "state.act.id",
+                      "i.atleastone.G20",
+                      "a.atleastone.G20",
+                      "currently.in.force",
+                      "eligible.firms",
+                      seq(2000,2030,1))
+      
+        order.rows <- order.list[order.list %in% names(master.xlsx) & ! order.list %in% seq(2000,2030,1)]
+        eval(parse(text=paste0("master.xlsx <- master.xlsx[with(master.xlsx, order(",paste0(order.rows, collapse = ", "),")),]")))
+        
+        # REMOVE ORDERCOL IF PRESENT
+        if ("orderCol" %in% order.rows) {
+          master.xlsx$orderCol <- NULL
+        }
+        
+        # ORDER COLUMNS
+        order.list <- order.list[order.list %in% names(master.xlsx)]
+        master.xlsx <- master.xlsx[order.list]
+      
+      # WRITE EXCEL
+      if (length(master) > 1) {
+        xlsx <- list("Data Counts" = master.1, "Parameter Choices" = p.choices[[1]], "Parameter Choices (All)" = p.choices[[2]])
+      } else {
+        xlsx <- list("Data Counts" = master.1, "Parameter Choices" = p.choices[[1]])  
+      }
+      openxlsx::write.xlsx(x=master.xlsx, file = paste(path,"results/Count statistics from ", Sys.Date(),".xlsx", sep=""), rowNames = F)
+
+    }
+    
+    if (kl$interventions.list==T) {
+      
+      xlsx.interventions <- list("Interventions" = interventions.parked, "Parameter Choices" = p.choices[[2]])
+      openxlsx::write.xlsx(x=xlsx.interventions, file = paste(path,"results/Interventions list from ", Sys.Date(),".xlsx", sep=""), rowNames = F)
+    }
+    
+    
+    
+      
+    #################################################
+    #
+    #   GRAPHS
+    #
+    #################################################
+      
     # Retrieve agg from backup
     agg <- agg.temp
+    gta_colour_palette()
     
     # MAP OUTPUT
     if (kl$map == T) {
@@ -711,13 +822,13 @@ tryCatch({
       rm(agg.bar, bar, colour, group, title, legend.title, x.var, y.var, x.axis, y.axis, col)
     }
     
-  }},
-  error = function(error.msg) {
-    if(error.message[1]==T){
-      error.message <<- c(T, stop.print)
-    } else {
-      error.message <<- c(T,error.msg$message)
-    }
-  })
+}},
+error = function(error.msg) {
+  if(error.message[1]==T){
+    error.message <<- c(T, stop.print)
+  } else {
+    error.message <<- c(T,error.msg$message)
+  }
 
-# rm(master.sliced, parameter.choice.slicer, gta_colour)
+})
+rm(master.sliced, parameter.choice.slicer, gta_colour)
