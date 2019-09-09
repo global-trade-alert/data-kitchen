@@ -3,7 +3,7 @@
 # rm(list=ls())
 # library(gtalibrary)
 # setwd("/Users/patrickbuess/Dropbox/Collaborations/GTA cloud")
-# load("0 dev/data-kitchen-pb/log/kitchen log.Rdata")
+# load("17 Shiny/4 data kitchen/log/kitchen log.Rdata")
 # kl = kitchen.log[nrow(kitchen.log),]
 
 # PROCESSING
@@ -517,8 +517,11 @@ tryCatch({
     }
     
     if (kl$interventions.list==T) {
-      
+     if (length(master) > 1) {
       xlsx.interventions <- list("Interventions" = interventions.parked, "Parameter Choices" = p.choices[[2]])
+     } else {
+       xlsx.interventions <- list("Interventions" = interventions.parked, "Parameter Choices" = p.choices[[1]])
+     }
       openxlsx::write.xlsx(x=xlsx.interventions, file = paste(path,"results/Interventions list from ", Sys.Date(),".xlsx", sep=""), rowNames = F)
     }
     
