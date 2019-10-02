@@ -86,7 +86,8 @@ if(kitchen.busy>2){
           
           ## Sending error email.
           library(mailR)
-          sender = "data@globaltradealert.org"
+          sender = gta_pwd("mail")$mail
+          
           recipients = as.character(kitchen.log$order.email[log.row])
           
           sbjct=paste("Your order could not be processed [GTA data dish #",kitchen.log$ticket.number[log.row],"][",kitchen.log$order.name[log.row],"]",sep="")
@@ -99,10 +100,10 @@ if(kitchen.busy>2){
                     body=message,
                     html=F,
                     # attach.files = attachments,
-                    smtp = list(host.name = "mail.infomaniak.com",
-                                port=587,
+                    smtp = list(host.name = gta_pwd("mail")$host,
+                                port=gta_pwd("mail")$port,
                                 user.name=sender,
-                                passwd="B0d@nstrasse",
+                                passwd=gta_pwd("mail")$password,
                                 tls=T),
                     authenticate = T)
           
@@ -112,10 +113,10 @@ if(kitchen.busy>2){
                     body=message,
                     html=F,
                     # attach.files = attachments,
-                    smtp = list(host.name = "mail.infomaniak.com",
-                                port=587,
+                    smtp = list(host.name = gta_pwd("mail")$host,
+                                port=gta_pwd("mail")$port,
                                 user.name=sender,
-                                passwd="B0d@nstrasse",
+                                passwd=gta_pwd("mail")$password,
                                 tls=T),
                     authenticate = T)
           
@@ -154,7 +155,7 @@ if(kitchen.busy>2){
           
           ## Serving a fresh data dish.
           library(mailR)
-          sender = "data@globaltradealert.org"
+          sender = gta_pwd("mail")$mail
           recipients = as.character(kitchen.log$order.email[log.row])
           sbjct=paste("Your data is ready [GTA data dish #",kitchen.log$ticket.number[log.row],"][",kitchen.log$order.name[log.row],"]",sep="")
           message="Hello \n\nThank you for your order. Please find the requested GTA data in the attached Excel file. \n\nIn case of questions or suggestions, please reply to this message. \n\nRegards\nGlobal Trade Alert Data"
@@ -166,10 +167,10 @@ if(kitchen.busy>2){
                     body=message,
                     html=F,
                     attach.files = attachments,
-                    smtp = list(host.name = "mail.infomaniak.com",
-                                port=587,
+                    smtp = list(host.name = gta_pwd("mail")$host,
+                                port=gta_pwd("mail")$port,
                                 user.name=sender,
-                                passwd="B0d@nstrasse",
+                                passwd=gta_pwd("mail")$password,
                                 tls=T),
                     authenticate = T)
           
@@ -194,7 +195,7 @@ if(kitchen.busy>2){
           
           ## Sending error email.
           library(mailR)
-          sender = "data@globaltradealert.org"
+          sender = gta_pwd("mail")$mail
           recipients = as.character(kitchen.log$order.email[log.row])
           
           sbjct=paste("Your order could not be processed [GTA data dish #",kitchen.log$ticket.number[log.row],"][",kitchen.log$order.name[log.row],"]",sep="")
@@ -207,10 +208,10 @@ if(kitchen.busy>2){
                     body=message,
                     html=F,
                     # attach.files = attachments,
-                    smtp = list(host.name = "mail.infomaniak.com",
-                                port=587,
+                    smtp = list(host.name = gta_pwd("mail")$host,
+                                port=gta_pwd("mail")$port,
                                 user.name=sender,
-                                passwd="B0d@nstrasse",
+                                passwd=gta_pwd("mail")$password,
                                 tls=T),
                     authenticate = T)
           
@@ -220,10 +221,10 @@ if(kitchen.busy>2){
                     body=message,
                     html=F,
                     # attach.files = attachments,
-                    smtp = list(host.name = "mail.infomaniak.com",
-                                port=587,
+                    smtp = list(host.name = gta_pwd("mail")$host,
+                                port=gta_pwd("mail")$port,
                                 user.name=sender,
-                                passwd="B0d@nstrasse",
+                                passwd=gta_pwd("mail")$password,
                                 tls=T),
                     authenticate = T)
           
@@ -290,7 +291,7 @@ if(kitchen.busy>2){
           
           
           ## Serving a fresh data dish.
-          sender = "data@globaltradealert.org"
+          sender = gta_pwd("mail")$mail
           recipients = as.character(kitchen.log$order.email[log.row])
           sbjct=paste("Your data is ready [GTA data dish #",kitchen.log$ticket.number[log.row],"][",kitchen.log$order.name[log.row],"]",sep="")
           message="Hello \n\nThank you for your order. Please find the requested GTA data in the attached Excel file.\n\nIn case of questions or suggestions, please reply to this message.\n\nRegards\nGlobal Trade Alert Data"
@@ -302,10 +303,10 @@ if(kitchen.busy>2){
                     body=message,
                     html=F,
                     attach.files = attachments,
-                    smtp = list(host.name = "mail.infomaniak.com",
-                                port=587,
+                    smtp = list(host.name = gta_pwd("mail")$host,
+                                port=gta_pwd("mail")$port,
                                 user.name=sender,
-                                passwd="B0d@nstrasse",
+                                passwd=gta_pwd("mail")$password,
                                 tls=T),
                     authenticate = T)
           

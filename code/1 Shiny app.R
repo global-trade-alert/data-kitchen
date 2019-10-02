@@ -1341,7 +1341,7 @@ server <- function(input, output, session) {
       test <- as.data.frame(t(subset(kitchen.log, ticket.number==nrow(kitchen.log))))
       test$text <- paste(row.names(test), test[,1], sep = ": ")
       
-      sender = "data@globaltradealert.org"
+      sender = gta_pwd("mail")$mail
       recipients = as.character(kitchen.log$order.email[nrow(kitchen.log)])
       sbjct=paste("Thank you for your order [GTA data dish #",kitchen.log$ticket.number[nrow(kitchen.log)],"]",sep="")
       message=paste("Hello<p>Thank you for your order. The requested file is being calculated and you will receive a ",
@@ -1356,10 +1356,10 @@ server <- function(input, output, session) {
                 body=message,
                 html=T,
                 # attach.files = falls ihr die parameter als XLSX anhaengt; im mail waere besser,
-                smtp = list(host.name = "mail.infomaniak.com",
-                            port=587,
+                smtp = list(host.name = gta_pwd("mail")$host,
+                            port=gta_pwd("mail")$port,
                             user.name=sender,
-                            passwd="B0d@nstrasse",
+                            passwd=gta_pwd("mail")$password,
                             tls=T),
                 authenticate = T)
       
@@ -1442,7 +1442,7 @@ server <- function(input, output, session) {
       test <- as.data.frame(t(subset(kitchen.log, ticket.number==nrow(kitchen.log))))
       test$text <- paste(row.names(test), test[,1], sep = ": ")
       
-      sender = "data@globaltradealert.org"
+      sender = gta_pwd("mail")$mail
       recipients = as.character(kitchen.log$order.email[nrow(kitchen.log)])
       sbjct=paste("Thank you for your order [GTA data dish #",kitchen.log$ticket.number[nrow(kitchen.log)],"]",sep="")
       message=paste("Hello<p>Thank you for your order. The requested file is being calculated and you will receive a ",
@@ -1455,10 +1455,10 @@ server <- function(input, output, session) {
                 body=message,
                 html=T,
                 # attach.files = falls ihr die parameter als XLSX anhaengt; im mail waere besser,
-                smtp = list(host.name = "mail.infomaniak.com",
-                            port=587,
+                smtp = list(host.name = gta_pwd("mail")$host,
+                            port=gta_pwd("mail")$port,
                             user.name=sender,
-                            passwd="B0d@nstrasse",
+                            passwd=gta_pwd("mail")$password,
                             tls=T),
                 authenticate = T)
       
