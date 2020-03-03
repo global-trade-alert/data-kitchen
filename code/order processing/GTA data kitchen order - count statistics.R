@@ -4,7 +4,7 @@
 # library(gtalibrary)
 # setwd("/Users/patrickbuess/Dropbox/Collaborations/GTA cloud")
 # load("17 Shiny/4 data kitchen/log/kitchen log.Rdata")
-# kl = kitchen.log[nrow(kitchen.log),]
+# kl = kitchen.log[1059,]
 
 # PROCESSING
 
@@ -60,8 +60,11 @@ tryCatch({
     s.period[s.period=="NA"] <- NA
   }else{s.period=NULL}
   
-  if(as.character(kl$in.force.today)!=""){
-    ift=paste(unlist(strsplit(as.character(kl$in.force.today),",")))}else{ift=NULL}
+  if(as.character(kl$keep.in.force.on.date)!=""){
+    ift=paste(unlist(strsplit(as.character(kl$keep.in.force.on.date),",")))}else{ift=NULL}
+  
+  if(as.character(kl$in.force.on.date)!=""){
+    ifod=paste(as.character(kl$in.force.on.date),",")}else{ifod=NULL}
   
   if(as.character(kl$intervention.types)!=""){
     i.types=paste(unlist(strsplit(as.character(kl$intervention.types),",")))
@@ -170,12 +173,14 @@ tryCatch({
                "i.types" = i.types)
   
   for (i in 1:length(types)) {
+    if(is.null(types[[i]])==F) {
     if(length(types[[i]]) == 1 & types[[i]] == "all") {
       eval(parse(text=paste0(names(types[i]),"= NULL")))  
     } else if ("all" %in% types[[i]]) {
       additional.all <- c(additional.all, names(types[i]))
       eval(parse(text=paste0(names(types[i]),"=",names(types[i]),"[",names(types[i]),"!= 'all']")))
     }  
+    }
   }
   
   # CONVERT HS AND CPC TO NUMERIC IF NECESSARY
@@ -201,7 +206,8 @@ tryCatch({
     revocation.period = r.period,
     keep.revocation.na = kl$keep.revocation.na == T,
     submission.period = s.period,
-    in.force.today = ift,
+    keep.in.force.on.date = ift,
+    in.force.on.date = ifod,
     intervention.types = i.types,
     keep.type = kl$keep.type==T,
     mast.chapters = mast,
@@ -274,7 +280,8 @@ tryCatch({
       revocation.period = r.period,
       keep.revocation.na = kl$keep.revocation.na == T,
       submission.period = s.period,
-      in.force.today = ift,
+      keep.in.force.on.date = ift,
+      in.force.on.date = ifod,
       intervention.types = i.types,
       keep.type = kl$keep.type==T,
       mast.chapters = mast,
@@ -516,6 +523,8 @@ tryCatch({
             p.choices.1$Parameter.Choices.choice[r] <- paste0(p.choices.1$Parameter.Choices.choice[r], " + All")
           }
         }
+      } else {
+        p.choices.1 <- as.data.frame(p.choices[[1]])
       }
       
       # WRITE EXCEL
@@ -836,7 +845,7 @@ tryCatch({
 }},
 error = function(error.msg) {
   if(error.message[1]==T){
-    error.message <<- c(T, stop.print)
+    error.message <<- c(T, error.message[2])
   } else {
     error.message <<- c(T,error.msg$message)
   }

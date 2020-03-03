@@ -1,17 +1,18 @@
 # UNCOMMENT FOR TESTING
 
+# rm(list=ls())
 # library(openxlsx)
 # library(gtalibrary)
 # setwd("/Users/patrickbuess/Dropbox/Collaborations/GTA cloud")
-# load("0 dev/data-kitchen-pb/log/kitchen log.Rdata")
-# kl = kitchen.log[nrow(kitchen.log),]
+# load("17 Shiny/4 data kitchen/log/kitchen log.Rdata")
+# kl = kitchen.log[1137,]
 
 library(openxlsx)
 
 # PROCESSING
 
-# path = "17 Shiny/4 data kitchen/"
-path = "0 dev/data-kitchen-pb/"
+path = "17 Shiny/4 data kitchen/"
+# path = "0 dev/data-kitchen-pb/"
 
 tryCatch({
   
@@ -79,8 +80,11 @@ tryCatch({
     s.period[s.period=="NA"] <- NA
   }else{s.period=NULL}
   
-  if(as.character(kl$in.force.today)!=""){
-    ift=paste(unlist(strsplit(as.character(kl$in.force.today),",")))}else{ift=NULL}
+  if(as.character(kl$keep.in.force.on.date)!=""){
+    ift=paste(unlist(strsplit(as.character(kl$keep.in.force.on.date),",")))}else{ift=NULL}
+  
+  if(as.character(kl$in.force.on.date)!=""){
+    ifod=paste(as.character(kl$in.force.on.date),",")}else{ifod=NULL}
   
   if(as.character(kl$intervention.types)!=""){
     i.types=paste(unlist(strsplit(as.character(kl$intervention.types),",")))
@@ -202,12 +206,14 @@ tryCatch({
                "i.types" = i.types)
   
   for (i in 1:length(types)) {
+    if (is.null(types[[i]])==F) {
     if(length(types[[i]]) == 1 & types[[i]] == "all") {
       eval(parse(text=paste0(names(types[i]),"= NULL")))  
     } else if ("all" %in% types[[i]]) {
       additional.all <- c(additional.all, names(types[i]))
       eval(parse(text=paste0(names(types[i]),"=",names(types[i]),"[",names(types[i]),"!= 'all']")))
     }  
+    }
   }
   
   # CONVERT HS AND CPC TO NUMERIC IF NECESSARY
@@ -244,7 +250,8 @@ tryCatch({
     revocation.period = r.period,
     keep.revocation.na = kl$keep.revocation.na==T,
     submission.period = s.period,
-    in.force.today = ift,
+    keep.in.force.on.date = ift,
+    in.force.on.date = ifod,
     intervention.types = i.types,
     keep.type = kl$keep.type==T,
     group.type=kl$group.type==T,
@@ -285,15 +292,18 @@ tryCatch({
                  c("cpc", "group.cpc","CPC Sectors","CPC Sectors"),
                  c("hs", "group.hs","HS Codes","HS Codes"),
                  c("mast", "group.mast","MAST chapters","MAST chapter name"),
-                 c("i.types", "group.type","Intervention types","Intervention types"))
+                 c("i.types", "group.type","Intervention types","Intervention type"))
     
     for (i in 1:length(types)) {
       if(types[[i]][1] %in% additional.all) {
         eval(parse(text=paste0(types[[i]][1],"= NULL")))
         eval(parse(text=paste0("kl$",types[[i]][2],"= TRUE")))
+        if(types[[i]][1]=="imps"){ kl$separate.importer.groups = F }
+        if(types[[i]][1]=="exps"){ kl$separate.exporter.groups = F }
       }
     }
     
+  
     ## running the function
     gta_trade_coverage(
       data.path="data/master_plus.Rdata",
@@ -324,7 +334,8 @@ tryCatch({
       revocation.period = r.period,
       keep.revocation.na = kl$keep.revocation.na==T,
       submission.period = s.period,
-      in.force.today = ift,
+      keep.in.force.on.date = ift,
+      in.force.on.date = ifod,
       intervention.types = i.types,
       keep.type = kl$keep.type==T,
       group.type=kl$group.type==T,
@@ -354,10 +365,22 @@ tryCatch({
     results.2 <- trade.coverage.estimates
     pm.choices.2 <- parameter.choices
     
+    # for (i in 1:length(types)) {
+    #   if(types[[i]][1] %in% additional.all) {
+    #     eval(parse(text=paste0("results.2$`",types[[i]][4],"` = 'All ", types[[i]][3]," in the GTA'")))
+    #     eval(parse(text=paste0("results$`",types[[i]][3],"` = 'Selected ", types[[i]][3],"'")))
+    #   }
+    # }
+
+    # ADD INDICATOR COLUMNS FOR ALL/SELECTED
     for (i in 1:length(types)) {
       if(types[[i]][1] %in% additional.all) {
-        eval(parse(text=paste0("results.2$`",types[[i]][4],"` = 'All ", types[[i]][3]," in the GTA'")))
-        eval(parse(text=paste0("results$`",types[[i]][3],"` = 'Selected ", types[[i]][3],"'")))
+        if (types[[i]][4] %in% names(results)) {
+          eval(parse(text=paste0("results.2$`",types[[i]][4],"` = 'All ", types[[i]][3]," in the GTA'")))
+        } else {
+          eval(parse(text=paste0("results.2$`",types[[i]][4],"` = 'All ", types[[i]][3]," in the GTA'")))
+          eval(parse(text=paste0("results$`",types[[i]][4],"` = 'Selected ", types[[i]][3],"'")))
+        }
       }
     }
     
@@ -365,19 +388,57 @@ tryCatch({
     if (ncol(results) != ncol(results.2)) {
       names.diff <- (names(results)[! names(results) %in% names(results.2)])
      for (n in names.diff) {
-       results.2[n] <- paste0("All ",n) 
+       results.2[n] <- paste0("All ",n," in the GTA") 
      }
     }
     
+    results$orderCol <- 1
+    results.2$orderCol <- 2
     results <- rbind(results, results.2)
     rm(results.2)
   }
   
+  # ADD "ALL" PARAMETER CHOICES TO A SINGLE PARAMTER CHOICES DF
+  if (exists("pm.choices.2")) {
+    for (r in 1:nrow(pm.choices)){
+      second.value <- pm.choices.2$parameter[pm.choices.2$parameter == pm.choices[r,1]]
+      if (pm.choices[r,2] != pm.choices.2$choice[pm.choices.2$parameter == second.value]) {
+        pm.choices$choice[r] <- paste0(pm.choices$choice[r], " + All")
+      }
+    }
+  }
+  
+  # ORDER COLUMNS AND ROWS
+  results.names <- names(results)
+  
+  # order columns
+  order.list <- c("orderCol",
+                  "`Importing country`",
+                  "`Exporting country`",
+                  "`MAST chapter ID`",
+                  "`MAST chapter name`",
+                  "`CPC Sectors`",
+                  "`HS Codes`",
+                  "`Intervention type`",
+                  "`Number of interventions affecting exported product`",
+                  c(paste0("`Trade coverage estimate for ",seq(2000,2030,1),"`")))
+  
+  order.rows <- order.list[gsub("`","",order.list) %in% names(results)]
+  eval(parse(text=paste0("results <- results[with(results, order(",paste0(order.rows, collapse = ", "),")),]")))
+  
+  # REMOVE ORDERCOL IF PRESENT
+  if ("orderCol" %in% order.rows) {
+    results$orderCol <- NULL
+  }
+  
+  # ORDER COLUMNS
+  order.list <- gsub("`","",order.list)
+  order.list <- order.list[order.list %in% names(results)]
+  results <- results[order.list]
+  
+  
   # SAVE EXCEL
   xlsxList <- list("Coverages"=results,"Parameter choices"=pm.choices)
-  if(exists("pm.choices.2")){
-    xlsxList[["Parameter choices (All)"]] <- pm.choices.2
-  }
   
   openxlsx::write.xlsx(xlsxList, file=paste(path,"results/",Sys.Date()," - GTA data dish #",kl$ticket.number,".xlsx",sep=""), rowNames = F)
   
@@ -393,7 +454,7 @@ tryCatch({
   
   error = function(error.msg) {
     if(error.message[1]==T){
-      error.message <<- c(T, stop.print)
+      error.message <<- c(T, error.message[2])
     } else {
       error.message <<- c(T,error.msg$message)
     }

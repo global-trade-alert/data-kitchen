@@ -246,7 +246,7 @@ ui <- function(request) { fluidPage(
                        selected = c("Inward","Outward","Outward subsidy"),
                        multiple =T)
     )
-    ),
+  ),
   fluidRow(
     column(6,
            tags$div(class = "create-tooltip help",
@@ -302,12 +302,16 @@ ui <- function(request) { fluidPage(
     column(6,
            tags$div(class = "create-tooltip help",
                     title = "
-                    <span>In force today</span>
-                    Specify whether you want to focus on interventions in force today ('TRUE') or no longer in force today ('FALSE'). Default is 'any'.
+                    <span>In force on date</span>
+                    Specify the cutoff date to control for in force interventions. Default is the current date.
+                    <span>Keep in force on date</span>
+                    Specify whether you want to focus on interventions in force on the specified date ('Yes') or no longer in force on the specified date ('No'). Default is 'any' i.e. regardless of enforcement status on the specified date.
                     ",
                     tags$p("?")),
-           selectInput("in.force.today.data.count",
-                       "Interventions in force today?",
+           dateInput("in.force.on.date.data.count",
+                     "In force on date"),
+           selectInput("keep.in.force.on.date.data.count",
+                       "Keep Interventions in force on date?",
                        c("Yes", "No", "Any"),
                        selected = "Any")),
     column(6,
@@ -579,7 +583,7 @@ ui <- function(request) { fluidPage(
            checkboxInput("tile.data.count",
                          "Tile Chart",
                          value = F))
-    ),
+  ),
   conditionalPanel(condition = "input['line.data.count'] == true",
                    tags$div(class = "settings-title", checked = NA,
                             tags$h2("Line chart settings")
@@ -678,12 +682,12 @@ ui <- function(request) { fluidPage(
                                         column.list.numeric,
                                         multiple = F),
                             numericInput("map.splits.data.count",
-                                        "Choose number of coloring shades",
-                                        value = 3),
+                                         "Choose number of coloring shades",
+                                         value = 3),
                             textInput("map.brackets.data.count",
                                       "Define bracket boundaries (will override number of coloring shades)",
-                                       placeholder = "e.g. '1,20,40'")
-                            ))
+                                      placeholder = "e.g. '1,20,40'")
+                     ))
   ),
   conditionalPanel(condition = "input['tile.data.count'] == true",
                    tags$div(class = "settings-title", checked = NA,
@@ -746,7 +750,7 @@ ui <- function(request) { fluidPage(
                              actionButton("save_query_data_count", label = "Save query"),
                              actionButton("generate_file_data_count",
                                           "Submit your order")
-                             )))
+                    )))
   ),
   
   HTML("</div>"),
@@ -769,9 +773,9 @@ ui <- function(request) { fluidPage(
                     ",
                     tags$p("?")),
            selectizeInput("predefined.coverages",
-                       label=NULL,
-                       choices = c("Default settings" = "Unset"))
-           ),
+                          label=NULL,
+                          choices = c("Default settings" = "Unset"))
+    ),
     tags$div(class="savequery",
              tags$div(class="savequery-wrap-inner",
                       tags$div(class="savequery-close-button"),
@@ -779,10 +783,10 @@ ui <- function(request) { fluidPage(
                                 label="Specify a query name"),
                       textAreaInput(inputId = "query.description", 
                                     cols = 8,
-                                   label = "Specify a query description"),
+                                    label = "Specify a query description"),
                       actionButton(inputId = "finish_save_query",
                                    label = "Save query")))
-    ),
+  ),
   
   
   
@@ -823,7 +827,8 @@ ui <- function(request) { fluidPage(
                                    "2014" = "2014",
                                    "2015" = "2015",
                                    "2016" = "2016",
-                                   "2017" = "2017"),
+                                   "2017" = "2017",
+                                   "2018" = "2018"),
                        multiple = F,
                        selected = "base"),
            selectInput("choose.output",
@@ -863,7 +868,7 @@ ui <- function(request) { fluidPage(
                        selected = c("Inward","Outward","Outward subsidy"),
                        multiple =T)
     )
-    ),
+  ),
   fluidRow(
     column(4,
            tags$div(class = "create-tooltip help",
@@ -950,7 +955,7 @@ ui <- function(request) { fluidPage(
                               c("Importer", "Exporter", "3rd country"),
                               selected = c("Importer", "3rd country"))
     )
-    ),
+  ),
   fluidRow(
     column(4,
            tags$div(class = "create-tooltip help",
@@ -1046,12 +1051,16 @@ ui <- function(request) { fluidPage(
     column(3,
            tags$div(class = "create-tooltip help",
                     title = "
-                    <span>In force today</span>
-                    Specify whether you want to focus on interventions in force today ('TRUE') or no longer in force today ('FALSE'). Default is 'any'.
+                    <span>In force on date</span>
+                    Specify the cutoff date to control for in force interventions. Default is the current date.
+                    <span>Keep in force on date</span>
+                    Specify whether you want to focus on interventions in force on the specified date ('Yes') or no longer in force on the specified date ('No'). Default is 'any' i.e. regardless of enforcement status on the specified date.
                     ",
                     tags$p("?")),
-           selectInput("in.force.today",
-                       "Should interventions be in force today?",
+           dateInput("in.force.on.date",
+                     "In force on date"),
+           selectInput("keep.in.force.on.date",
+                       "Keep Interventions in force on date?",
                        c("Yes", "No", "Any"),
                        selected = "Any"))
   ),
@@ -1244,7 +1253,7 @@ ui <- function(request) { fluidPage(
   tags$script(HTML("$('.savequery-close-button-datacount').on('click', function () {
                             $('.savequery-datacount').toggleClass('active')
            });"))
-    ) }
+) }
 
 ######## SERVER #########
 
@@ -1341,7 +1350,7 @@ server <- function(input, output, session) {
       test <- as.data.frame(t(subset(kitchen.log, ticket.number==nrow(kitchen.log))))
       test$text <- paste(row.names(test), test[,1], sep = ": ")
       
-      sender = gta_pwd("mail")$mail
+      sender = gta_pwd("bastiat")$mail
       recipients = as.character(kitchen.log$order.email[nrow(kitchen.log)])
       sbjct=paste("Thank you for your order [GTA data dish #",kitchen.log$ticket.number[nrow(kitchen.log)],"]",sep="")
       message=paste("Hello<p>Thank you for your order. The requested file is being calculated and you will receive a ",
@@ -1356,10 +1365,10 @@ server <- function(input, output, session) {
                 body=message,
                 html=T,
                 # attach.files = falls ihr die parameter als XLSX anhaengt; im mail waere besser,
-                smtp = list(host.name = gta_pwd("mail")$host,
-                            port=gta_pwd("mail")$port,
+                smtp = list(host.name = gta_pwd("bastiat")$host,
+                            port=gta_pwd("bastiat")$port,
                             user.name=sender,
-                            passwd=gta_pwd("mail")$password,
+                            passwd=gta_pwd("bastiat")$password,
                             tls=T),
                 authenticate = T)
       
@@ -1442,7 +1451,7 @@ server <- function(input, output, session) {
       test <- as.data.frame(t(subset(kitchen.log, ticket.number==nrow(kitchen.log))))
       test$text <- paste(row.names(test), test[,1], sep = ": ")
       
-      sender = gta_pwd("mail")$mail
+      sender = gta_pwd("bastiat")$mail
       recipients = as.character(kitchen.log$order.email[nrow(kitchen.log)])
       sbjct=paste("Thank you for your order [GTA data dish #",kitchen.log$ticket.number[nrow(kitchen.log)],"]",sep="")
       message=paste("Hello<p>Thank you for your order. The requested file is being calculated and you will receive a ",
@@ -1455,11 +1464,12 @@ server <- function(input, output, session) {
                 body=message,
                 html=T,
                 # attach.files = falls ihr die parameter als XLSX anhaengt; im mail waere besser,
-                smtp = list(host.name = gta_pwd("mail")$host,
-                            port=gta_pwd("mail")$port,
+                smtp = list(host.name = gta_pwd("bastiat")$host,
+                            port=gta_pwd("bastiat")$port,
                             user.name=sender,
-                            passwd=gta_pwd("mail")$password,
-                            tls=T),
+                            passwd=gta_pwd("bastiat")$password,
+                            tls=T,
+                            ssl=T),
                 authenticate = T)
       
       output$queue <- renderText({
@@ -1501,10 +1511,10 @@ server <- function(input, output, session) {
     source(paste0(path,"code/functions/saveQueryDataCount.R"))
     
     saveQueryDataCount(session = session,
-                      path = path,
-                      title = input$query.name.data.count,
-                      description = input$query.description.data.count,
-                      input = reactiveValuesToList(input))
+                       path = path,
+                       title = input$query.name.data.count,
+                       description = input$query.description.data.count,
+                       input = reactiveValuesToList(input))
   })
   
   
@@ -1526,8 +1536,8 @@ server <- function(input, output, session) {
     eval(parse(text=paste0("title = ",gsub(".R","",basename(fct)),"(session = session, type = 'title')")))
     eval(parse(text=paste0("description = ",gsub(".R","",basename(fct)),"(session = session, type = 'description')")))
     queriesdf_datacount <- rbind(queriesdf_datacount, data.frame(title = title,
-                                             description = description,
-                                             value = gsub(".R","",basename(fct))))
+                                                                 description = description,
+                                                                 value = gsub(".R","",basename(fct))))
   }
   
   # UPDATE QUERY LIST COVERAGES
