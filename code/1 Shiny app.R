@@ -13,7 +13,8 @@ library(tidyverse)
 
 rm(list = ls())
 
-setwd("/home/rstudio/Dropbox/GTA cloud")
+# setwd("/home/rstudio/Dropbox/GTA cloud")
+gta_setwd()
 # setwd("C:/Users/jfrit/Desktop/Dropbox/GTA cloud")
 # setwd("C:/Users/Piotr Lukaszuk/Dropbox/GTA cloud")
 # setwd("/Users/patrickbuess/Dropbox/Collaborations/GTA cloud")
@@ -828,7 +829,8 @@ ui <- function(request) { fluidPage(
                                    "2015" = "2015",
                                    "2016" = "2016",
                                    "2017" = "2017",
-                                   "2018" = "2018"),
+                                   "2018" = "2018",
+                                   "2019" = "2019"),
                        multiple = F,
                        selected = "base"),
            selectInput("choose.output",
